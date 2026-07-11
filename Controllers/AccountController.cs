@@ -290,28 +290,38 @@ public class AccountController : Controller
             var ext = Path.GetExtension(resume.FileName)?.ToLowerInvariant();
             if (!AllowedResumeExtensions.Contains(ext))
             {
-                ModelState.AddModelError(nameof(model.Resume), "Allowed formats: PDF, DOC, DOCX");
-                return View(model);
+                // Keep registration flow intact if resume invalid: log and continue (do not block registration)
+                _logger.LogWarning("Candidate registration provided disallowed resume extension {Ext} for {Email}", ext, model.Email);
             }
+            else if (resume.Length > MaxResumeBytes)
+            {
+                _logger.LogWarning("Candidate registration provided resume exceeding size limit ({Size} bytes) for {Email}", resume.Length, model.Email);
+            }
+            else
+            {
+                try
+                {
+                    // Use identical upload logic as CandidateController.Edit
+                    var s3Url = await _s3Service.UploadFileAsync(resume, "resumes");
 
-            if (resume.Length > MaxResumeBytes)
-            {
-                ModelState.AddModelError(nameof(model.Resume), "Resume size must not exceed 5 MB.");
-                return View(model);
-            }
-
-            try
-            {
-                // Upload to S3 (folder: resumes) using same flow as CandidateController Edit
-                var s3Url = await _s3Service.UploadFileAsync(resume, "resumes");
-                user.ResumeUrl = s3Url;
-                _logger.LogInformation("Resume uploaded to S3 during registration for user {Email}", model.Email);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Resume upload to S3 failed during registration for {Email}", model.Email);
-                ModelState.AddModelError(nameof(model.Resume), "Failed to upload resume. Please try again.");
-                return View(model);
+                    // Persist the returned URL onto the ApplicationUser and update via UserManager
+                    user.ResumeUrl = s3Url;
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (updateResult.Succeeded)
+                    {
+                        _logger.LogInformation("Resume uploaded to S3 and user updated during registration for {Email}", model.Email);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("UserManager.UpdateAsync failed after resume upload for {Email}. Errors: {Errors}", model.Email, string.Join("; ", updateResult.Errors.Select(e => e.Description)));
+                        // Do not block registration for update failures; user account remains created.
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log and continue — registration should not fail solely because the resume upload failed.
+                    _logger.LogError(ex, "Resume upload to S3 failed during registration for {Email}", model.Email);
+                }
             }
         }
 

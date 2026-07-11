@@ -1,0 +1,42 @@
+# Buildspec for AWS CodeBuild to produce a publish artifact for Elastic Beanstalk (Amazon Linux 2023).
+# - Targets .NET 8
+# - Builds in Release configuration
+# - Publishes output into a folder named `publish`
+# - Artifacts section sends only the published output to the pipeline (base-directory: publish)
+
+version: 0.2
+
+phases:
+  install:
+    # Instruct CodeBuild to use .NET 8 runtime
+    runtime-versions:
+      dotnet: 8.0
+    # Minimal install phase — no extra commands required
+
+  build:
+    commands:
+      # Restore NuGet packages for the project (explicit path to the .csproj in repository root)
+      - dotnet restore OpportunityHub.csproj
+
+      # Build the project in Release configuration (no-restore because restore already ran)
+      - dotnet build OpportunityHub.csproj -c Release --no-restore
+
+  post_build:
+    commands:
+      # Publish the app to a folder named `publish`. Do not produce a self-contained deployment.
+      # The --no-build and --no-restore flags are used because build/restore already completed.
+      - dotnet publish OpportunityHub.csproj -c Release -o publish --no-build --no-restore
+
+artifacts:
+  # Only the contents of the publish folder will be sent to the next stage (Elastic Beanstalk).
+  # CodePipeline / CodeBuild will compress these files into the artifact ZIP that EB expects.
+  files:
+    - '**/*'
+  base-directory: publish
+  discard-paths: no
+
+# Notes:
+# - The path to the project file used above is `OpportunityHub.csproj` located at the repository root.
+#   If your .csproj lives in a subfolder, replace the path accordingly (e.g. `src/OpportunityHub/OpportunityHub.csproj`).
+# - Procfile and other publish-included files are expected to be included by the .csproj publish step.
+# - This buildspec avoids unnecessary commands, Docker, and self-contained publish as requested.
