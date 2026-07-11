@@ -1,0 +1,36 @@
+/* ======================================================================
+   ADMIN-SPECIFIC STYLES (scoped under .admin-dashboard)
+   Moved verbatim from site.css so admin styles load only on admin pages.
+   Do NOT change selectors here.
+   ====================================================================== */
+
+.admin-dashboard .kpi-card { display:flex; align-items:center; gap:16px; border-radius:12px; padding:18px; }
+.admin-dashboard .icon-circle { width:56px; height:56px; border-radius:12px; display:grid; place-items:center; font-size:1.25rem; box-shadow:0 8px 18px rgba(0,0,0,.06); }
+.admin-dashboard .icon-circle.bg-primary { background:var(--primary); color:#fff; }
+.admin-dashboard .icon-circle.bg-info { background:#0ea5ff; color:#fff; }
+.admin-dashboard .icon-circle.bg-success { background:#23a36d; color:#fff; }
+.admin-dashboard .icon-circle.bg-warning { background:#f6a400; color:#fff; }
+
+.admin-dashboard .card-modern { padding:18px; border-radius:12px; }
+.admin-dashboard .card-modern .card-header { background:transparent; border-bottom:0; }
+
+.admin-dashboard .admin-table thead th { position: sticky; top:0; background:#fbfbfd; z-index:3; }
+.admin-dashboard .admin-table tbody tr { transition: background .18s ease, transform .12s ease; }
+.admin-dashboard .admin-table tbody tr:hover { transform: translateY(-2px); background: #f8f7fb; }
+
+.admin-dashboard .admin-table .btn { min-width:42px; display:inline-flex; align-items:center; justify-content:center; padding:8px; border-radius:8px; }
+.admin-dashboard .admin-table .btn i { font-size:1rem;}
+
+/* focus-visible for accessibility */
+.admin-dashboard .btn.focus-visible, .admin-dashboard .btn:focus { box-shadow:0 6px 18px rgba(99,91,255,.12); outline:2px solid rgba(99,91,255,.12); }
+
+/* sticky header small screens */
+@media (max-width: 768px) {
+  .admin-dashboard .admin-table thead th { position: sticky; top:56px; }
+}
+
+/* subtle animation for KPI entry */
+.admin-dashboard .kpi-card { will-change: transform, opacity; }
+
+/* empty state */
+.admin-dashboard .empty-state-container { max-width:720px; margin:22px auto; }

@@ -1,0 +1,354 @@
+/* employer.css
+   Employer-specific styles moved from site.css.
+   All selectors are scoped under the existing employer wrapper: .employer-section
+   DO NOT change stylesheet values; this file must be loaded only on EmployerController pages.
+*/
+
+/* Employer hero */
+.employer-section .employer-hero h1{
+    font-size:3.1rem;
+    max-width:750px;
+    margin:12px auto;
+}
+
+/* Employer section layout */
+.employer-section{
+    padding:75px 0 110px;
+}
+
+.employer-section .employer-layout{
+    display:grid;
+    grid-template-columns:.8fr 1.2fr;
+    gap:90px;
+    align-items:start;
+}
+
+/* Posting benefits (sticky panel) */
+.employer-section .posting-benefits{
+    position:sticky;
+    top:115px;
+}
+
+.employer-section .posting-benefits > p{
+    font-size:.9rem;
+    margin-bottom:30px;
+}
+
+/* Benefit list used on employer pages */
+.employer-section .benefit{
+    display:flex;
+    gap:14px;
+    margin:23px 0;
+}
+
+.employer-section .benefit > span{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    background:#e7f8f0;
+    color:var(--green);
+    display:grid;
+    place-items:center;
+    flex:0 0 32px;
+    font-weight:800;
+}
+
+.employer-section .benefit b{
+    font-size:.84rem;
+}
+
+.employer-section .benefit p{
+    font-size:.75rem;
+    margin:3px 0;
+}
+
+/* Posting form (post opportunity) */
+.employer-section .posting-form{
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:35px;
+    box-shadow:var(--shadow);
+}
+
+.employer-section .form-heading{
+    display:flex;
+    gap:14px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:22px;
+    margin-bottom:25px;
+}
+
+.employer-section .form-heading > span{
+    width:37px;
+    height:37px;
+    border-radius:50%;
+    background:#f0edff;
+    color:var(--primary);
+    display:grid;
+    place-items:center;
+    font-size:.7rem;
+    font-weight:800;
+}
+
+.employer-section .form-heading h2{
+    font-size:1.25rem;
+    margin:0;
+}
+
+.employer-section .form-heading p{
+    font-size:.75rem;
+    margin:4px 0;
+}
+
+.employer-section .posting-form .form-grid{
+    gap:18px;
+}
+
+.employer-section .posting-form textarea{
+    resize:vertical;
+}
+
+.employer-section .posting-form > .btn{
+    margin-top:24px;
+}
+
+/* employer.css
+   Employer portal spacing & dashboard alignment rules.
+   Scope: all selectors are prefixed with the existing employer wrapper: .employer-section
+   Purpose: match Admin dashboard spacing/sizing/layout while keeping Employer branding/colors.
+   Only spacing, sizing and layout are adjusted — no color, font-size (except minor spacing-related size adjustments),
+   animation or selector names were changed.
+*/
+
+/* -------- Base employer layout adjustments -------- */
+/* Reduce excessive top/bottom padding so Employer pages align with Admin (container .py-5) */
+.employer-section {
+    padding-top: 3rem;   /* match Admin container top spacing (py-5 ? 3rem) */
+    padding-bottom: 3rem;
+}
+
+/* Employer hero heading and subtitle spacing to match Admin */
+.employer-section .employer-hero {
+    padding-top: 0; /* hero placed flush with section top spacing */
+}
+.employer-section .employer-hero h1 {
+    margin-top: 0;
+    margin-bottom: 0.5rem; /* similar to Admin heading spacing */
+}
+.employer-section .employer-hero p {
+    margin-bottom: 0;
+    margin-top: 0.25rem;
+}
+
+/* -------- KPI cards and dashboard card sizing (match Admin layout) -------- */
+/* Ensure KPI cards use same spacing / padding as Admin .kpi-card */
+.employer-section .kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-radius: 12px;
+    padding: 18px;
+    background: transparent; /* keep company branding colors as-is */
+}
+
+/* Icon circle sizing consistent with Admin */
+.employer-section .kpi-card .icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+    box-shadow: 0 8px 18px rgba(0,0,0,.06);
+}
+
+/* Dashboard section cards use Admin-like compact padding & radius */
+.employer-section .card-modern {
+    padding: 18px;
+    border-radius: 12px;
+}
+
+/* Card header spacing similar to Admin */
+.employer-section .card-modern .card-header {
+    background: transparent;
+    border-bottom: 0;
+    padding: 0;
+    margin-bottom: 8px;
+}
+
+/* Reduce gaps between dashboard sections to match Admin */
+.employer-section .section,
+.employer-section .section-heading {
+    margin-bottom: 1rem;
+}
+
+/* -------- Posting form and employer cards alignment -------- */
+.employer-section .posting-form {
+    border: 1px solid var(--line);
+    border-radius: 12px; /* slightly smaller radius to match Admin card radius */
+    padding: 20px;       /* slightly reduced padding to align with Admin card density */
+    box-shadow: var(--shadow-sm);
+}
+
+/* Posting form heading spacing match Admin */
+.employer-section .form-heading {
+    display: flex;
+    gap: 14px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+}
+
+/* Form controls: keep global styles, but adjust local vertical rhythm */
+.employer-section .posting-form .form-grid {
+    gap: 14px;
+}
+.employer-section .posting-form > .btn {
+    margin-top: 16px;
+}
+
+/* Posting benefits sticky behavior preserved; spacing normalized */
+.employer-section .posting-benefits {
+    position: sticky;
+    top: 100px; /* match Admin sticky offsets */
+}
+
+/* Benefit list entry spacing */
+.employer-section .benefit {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+}
+.employer-section .benefit > span {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+
+/* -------- Tables and compactness -------- */
+/* Apply Admin-like compact table density for employer tables */
+.employer-section .table-responsive-modern {
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+.employer-section .table thead {
+    background: #f8f7fb;
+    border-bottom: 1px solid var(--line);
+}
+.employer-section .table th {
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #6b7080;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 12px 14px;
+}
+.employer-section .table td {
+    padding: 12px 14px;
+    font-size: .85rem;
+}
+
+/* Hover state similar to Admin table rows */
+.employer-section .table tbody tr:hover {
+    background: #faf9fc;
+}
+
+/* Compact pagination area */
+.employer-section .pagination {
+    gap: 6px;
+}
+
+/* -------- Buttons sizing alignment -------- */
+/* Keep colors; adjust sizes and spacing to mimic Admin density */
+.employer-section .btn {
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 700;
+}
+.employer-section .btn-small {
+    padding: 6px 12px;
+    font-size: .75rem;
+}
+
+/* -------- Employer dropdown (profile menu) styling
+           This targets dropdowns only on Employer pages (employer.css loaded only for EmployerController).
+           It matches Admin dropdown dimensions, padding, border-radius, shadow, spacing, hover effect,
+           alignment and animation. Menu items remain Employer-specific in content.
+----------- */
+.nav-actions .dropdown-menu,
+.nav-actions > .dropdown .dropdown-menu {
+    min-width: 220px;
+    padding: 6px 0;
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(28,30,55,.09);
+    border: 1px solid rgba(20,20,40,0.04);
+    transform-origin: top right;
+    animation: dropdown-appear .14s ease-out;
+    background: #fff; /* keep default background */
+    z-index: 1050;
+}
+
+.nav-actions .dropdown-menu .dropdown-item {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .12s ease;
+}
+
+.nav-actions .dropdown-menu .dropdown-item:hover,
+.nav-actions .dropdown-menu .dropdown-item:focus {
+    background: #f4f3fa;
+    color: inherit;
+}
+
+.nav-actions .dropdown-menu .dropdown-divider {
+    margin: 6px 0;
+}
+
+.nav-actions .dropdown-menu.dropdown-menu-end {
+    right: 0;
+    left: auto;
+}
+
+/* small caret spacing */
+.nav-actions .dropdown-toggle::after {
+    margin-left: 8px;
+}
+
+/* animation keyframes (keep same as admin) */
+@keyframes dropdown-appear {
+    from { opacity: 0; transform: translateY(-4px) scale(.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* -------- Responsive preserves (ensure employer layout behavior remains) -------- */
+@media (max-width: 1024px) {
+    .employer-section .employer-layout {
+        grid-template-columns: 1fr;
+        gap: 34px;
+    }
+    .employer-section .posting-benefits { position: static; top: auto; }
+}
+
+@media (max-width: 768px) {
+    .employer-section { padding-top: 2rem; padding-bottom: 2rem; } /* slightly reduce on small screens */
+    .employer-section .kpi-card { padding: 12px; gap: 10px; }
+    .employer-section .icon-circle { width: 48px; height: 48px; }
+    .employer-section .posting-benefits { position: static; top: auto; }
+}
+
+/* Employer menu (uses same structure/classes/icons as Admin items) */
+else if (User.IsInRole("Employer"))
+{
+    <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Employer" asp-action="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+    <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Employer" asp-action="Jobs"><i class="bi bi-list-ul"></i> My Jobs</a></li>
+    <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Employer" asp-action="CompanyProfile"><i class="bi bi-building"></i> Company Profile</a></li>
+    <li><hr class="dropdown-divider" /></li>
+}

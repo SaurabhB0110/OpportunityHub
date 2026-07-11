@@ -1,0 +1,148 @@
+@using OpportunityHub.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="OpportunityHub connects ambitious people with internships and jobs at growing companies." />
+    <title>@ViewData["Title"] · OpportunityHub</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @{
+        // Simple, maintainable portal stylesheet loader based ONLY on controller name.
+        // This is intentionally simple: no actions, no area heuristics, no services.
+        var controller = (ViewContext.RouteData.Values["controller"] ?? "").ToString().ToLowerInvariant();
+    }
+
+    @if (controller == "admin")
+    {
+        <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    }
+    else if (controller == "employer")
+    {
+        <link rel="stylesheet" href="~/css/employer.css" asp-append-version="true" />
+    }
+    else if (controller == "candidate")
+    {
+        <link rel="stylesheet" href="~/css/candidate.css" asp-append-version="true" />
+    }
+    else if (controller == "account")
+    {
+        <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+    }
+</head>
+<body>
+    <div class="announcement">
+        <div class="shell">✨ Your next big opportunity is closer than you think. <a asp-controller="Jobs" asp-action="Index">Explore what's new <span>→</span></a></div>
+    </div>
+
+    <header class="site-header sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+            <div class="container shell">
+                <a class="navbar-brand d-flex align-items-center brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span>opportunity<span>hub</span></span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Jobs" asp-action="Index">Jobs</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">How it works</a></li>
+                    </ul>
+
+                    <div class="d-flex align-items-center nav-actions">
+                        @if (!User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <a class="btn btn-ghost me-2" asp-controller="Account" asp-action="Login">Log in</a>
+                            <a class="btn btn-light text-primary me-2" asp-controller="Account" asp-action="RegisterCandidate">Register</a>
+                            <a class="btn btn-outline-primary" asp-controller="Account" asp-action="RegisterEmployer">For employers</a>
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center">
+                                <a class="me-3 position-relative text-muted" href="#" title="Notifications">
+                                    <i class="bi bi-bell-fill" style="font-size:1.15rem;"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.62rem;">
+                                        0
+                                        <span class="visually-hidden">unread notifications</span>
+                                    </span>
+                                </a>
+
+                                <div class="dropdown">
+                                    <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="nav-avatar me-2" aria-hidden="true">@User.Identity?.Name?.Substring(0,1).ToUpper()</div>
+                                        <div class="d-none d-md-block text-dark me-2">@User.Identity?.Name</div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                        @if (User.IsInRole("SuperAdmin"))
+                                        {
+                                            <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2"></i> Admin Dashboard</a></li>
+                                            <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Admin" asp-action="ManageEmployers"><i class="bi bi-building"></i> Manage Employers</a></li>
+                                            <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Admin" asp-action="PendingEmployers"><i class="bi bi-hourglass-split"></i> Pending Employers</a></li>
+                                            <li><a class="dropdown-item d-flex align-items-center gap-2" asp-controller="Admin" asp-action="ManageCandidates"><i class="bi bi-people"></i> Manage Candidates</a></li>
+                                            <li><hr class="dropdown-divider" /></li>
+                                        }
+                                        else if (User.IsInRole("Employer"))
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="Employer" asp-action="Dashboard">Employer Dashboard</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Employer" asp-action="Jobs">My Jobs</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Employer" asp-action="CompanyProfile">Company Profile</a></li>
+                                            <li><hr class="dropdown-divider" /></li>
+                                        }
+                                        else if (User.IsInRole("Candidate"))
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="Candidate" asp-action="Dashboard">Dashboard</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Candidate" asp-action="Profile">Profile</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Candidate" asp-action="Edit">Edit Profile</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Applications" asp-action="MyApplications">My Applications</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Jobs" asp-action="Index">Browse Jobs</a></li>
+                                            <li><hr class="dropdown-divider" /></li>
+                                        }
+
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2"><i class="bi bi-box-arrow-right"></i> Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="flex-grow-1">@RenderBody()</main>
+
+    <footer class="site-footer">
+        <div class="shell footer-grid">
+            <div>
+                <a class="brand brand-light" asp-controller="Home" asp-action="Index"><span class="brand-mark"><i></i><i></i><i></i></span><span>opportunity<span>hub</span></span></a>
+                <p>Helping ambitious people find work worth doing.</p>
+            </div>
+            <div><h4>Explore</h4><a asp-controller="Jobs" asp-action="Index">Jobs</a><a asp-controller="Home" asp-action="About">How it works</a></div>
+            <div><h4>Company</h4><a asp-controller="Home" asp-action="About">About us</a><a href="mailto:hello@opportunityhub.test">Contact</a></div>
+            <div><h4>For employers</h4><a asp-controller="Employer" asp-action="Create">Post an opportunity</a></div>
+        </div>
+        <div class="shell footer-bottom"><span>© @DateTime.Now.Year OpportunityHub. Built for better beginnings.</span><span>Made with care in India 🇮🇳</span></div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,389 @@
+﻿@model List<OpportunityHub.Models.JobApplication>
+@{
+    ViewData["Title"] = "Applicants - " + ViewData["JobTitle"];
+    var jobTitle = ViewData["JobTitle"] as string ?? "Job";
+    var jobIdForRedirect = ViewData["JobId"] as int? ?? 0;
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <h1 class="h2 fw-bold mb-2">Applicants for @jobTitle</h1>
+            <p class="text-muted">Review and manage applications</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("MyJobs")" class="btn btn-outline-secondary">Back to Jobs</a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- STEP 4: Search & Filter Panel -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <input type="hidden" name="id" value="@ViewData["JobId"]" />
+                
+                <div class="col-md-4">
+                    <label class="form-label">Search Applicant</label>
+                    <input type="text" name="search" class="form-control" placeholder="Name or email..." value="@ViewData["Search"]" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        @{
+                            var statusFilter = ViewData["StatusFilter"]?.ToString();
+                        }
+                        @if (string.IsNullOrEmpty(statusFilter))
+                        {
+                            <option value="" selected>All Statuses</option>
+                        }
+                        else
+                        {
+                            <option value="">All Statuses</option>
+                        }
+
+                        @if (statusFilter == "Applied")
+                        {
+                            <option value="Applied" selected>Applied</option>
+                        }
+                        else
+                        {
+                            <option value="Applied">Applied</option>
+                        }
+
+                        @if (statusFilter == "Shortlisted")
+                        {
+                            <option value="Shortlisted" selected>Shortlisted</option>
+                        }
+                        else
+                        {
+                            <option value="Shortlisted">Shortlisted</option>
+                        }
+
+                        @if (statusFilter == "Hired")
+                        {
+                            <option value="Hired" selected>Hired</option>
+                        }
+                        else
+                        {
+                            <option value="Hired">Hired</option>
+                        }
+
+                        @if (statusFilter == "Rejected")
+                        {
+                            <option value="Rejected" selected>Rejected</option>
+                        }
+                        else
+                        {
+                            <option value="Rejected">Rejected</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="fromDate" class="form-control" value="@ViewData["FromDate"]" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="toDate" class="form-control" value="@ViewData["ToDate"]" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Sort By</label>
+                    <select name="sort" class="form-select">
+                        @{
+                            var sortVal = ViewData["Sort"]?.ToString();
+                        }
+                        @if (string.IsNullOrEmpty(sortVal) || sortVal == "newest")
+                        {
+                            <option value="newest" selected>Newest</option>
+                        }
+                        else
+                        {
+                            <option value="newest">Newest</option>
+                        }
+                        @if (sortVal == "oldest")
+                        {
+                            <option value="oldest" selected>Oldest</option>
+                        }
+                        else
+                        {
+                            <option value="oldest">Oldest</option>
+                        }
+                        @if (sortVal == "name_asc")
+                        {
+                            <option value="name_asc" selected>Name A-Z</option>
+                        }
+                        else
+                        {
+                            <option value="name_asc">Name A-Z</option>
+                        }
+                        @if (sortVal == "name_desc")
+                        {
+                            <option value="name_desc" selected>Name Z-A</option>
+                        }
+                        else
+                        {
+                            <option value="name_desc">Name Z-A</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <a href="@Url.Action("Applicants", new { id = ViewData["JobId"] })" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var app in Model.OrderByDescending(a => a.AppliedAt))
+            {
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title fw-bold">@app.CandidateName</h5>
+                                    <p class="text-muted mb-0">@app.CandidateEmail</p>
+                                </div>
+                                <span class="badge bg-@GetStatusBadgeColor(app.Status)">@app.Status</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Applied: @app.AppliedAt.ToString("MMM d, yyyy HH:mm")</small>
+                                @if (!string.IsNullOrEmpty(app.CoverLetter))
+                                {
+                                    <small class="d-block mt-2"><strong>Cover Letter:</strong></small>
+                                    <p class="small text-muted">@app.CoverLetter.Substring(0, Math.Min(100, app.CoverLetter.Length))...</p>
+                                }
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                @if (!string.IsNullOrEmpty(app.ResumeUrl))
+                                {
+                                    <a href="@Url.Action("DownloadResume", new { applicationId = app.Id })" class="btn btn-sm btn-outline-primary">📥 Resume</a>
+                                }
+
+                                <!-- View Details -->
+                                <a href="@Url.Action("Details", new { applicationId = app.Id })" class="btn btn-sm btn-outline-secondary">View Details</a>
+
+                                <!-- Quick action buttons: Shortlist, Hire, Reject -->
+                                <form asp-action="ShortlistApplicant" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="applicationId" value="@app.Id" />
+                                    <input type="hidden" name="jobId" value="@jobIdForRedirect" />
+                                    @if (app.Status == "Shortlisted")
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-warning" disabled>Shortlisted</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">Shortlist</button>
+                                    }
+                                </form>
+
+                                <form asp-action="HireApplicant" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="applicationId" value="@app.Id" />
+                                    <input type="hidden" name="jobId" value="@jobIdForRedirect" />
+                                    @if (app.Status == "Hired")
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-success" disabled>Hired</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Hire</button>
+                                    }
+                                </form>
+
+                                <form asp-action="RejectApplicant" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="applicationId" value="@app.Id" />
+                                    <input type="hidden" name="jobId" value="@jobIdForRedirect" />
+                                    @if (app.Status == "Rejected")
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-danger" disabled>Rejected</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    }
+                                </form>
+
+                                <!-- Keep existing inline status selector for compatibility -->
+                                <form asp-action="UpdateApplicationStatus" method="post" class="flex-grow-1 ms-2">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="applicationId" value="@app.Id" />
+                                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        @if (app.Status == "Applied")
+                                        {
+                                            <option value="Applied" selected>Applied</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Applied">Applied</option>
+                                        }
+                                        @if (app.Status == "Shortlisted")
+                                        {
+                                            <option value="Shortlisted" selected>Shortlisted</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Shortlisted">Shortlisted</option>
+                                        }
+                                        @if (app.Status == "Hired")
+                                        {
+                                            <option value="Hired" selected>Hired</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Hired">Hired</option>
+                                        }
+                                        @if (app.Status == "Rejected")
+                                        {
+                                            <option value="Rejected" selected>Rejected</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Rejected">Rejected</option>
+                                        }
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <p style="font-size: 48px; margin-bottom: 16px;">📭</p>
+            <p class="text-muted mb-4">No applications yet</p>
+        </div>
+    }
+
+    <!-- STEP 6: Pagination -->
+    @{
+        var currentPage = (int)ViewData["CurrentPage"];
+        var totalPages = (int)ViewData["TotalPages"];
+        var totalRecords = (int)ViewData["TotalRecords"];
+        var pageSize = (int)ViewData["PageSize"];
+    }
+
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <!-- Previous Button -->
+                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                    @if (currentPage > 1)
+                    {
+                        <a class="page-link" href="@Url.Action("Applicants", new { id = ViewData["JobId"], search = ViewData["Search"], status = ViewData["StatusFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = currentPage - 1 })">Previous</a>
+                    }
+                    else
+                    {
+                        <span class="page-link">Previous</span>
+                    }
+                </li>
+
+                <!-- Page Numbers -->
+                @{
+                    var startPage = Math.Max(1, currentPage - 2);
+                    var endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Applicants", new { id = ViewData["JobId"], search = ViewData["Search"], status = ViewData["StatusFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = 1 })">1</a>
+                        </li>
+                        if (startPage > 2)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    for (int p = startPage; p <= endPage; p++)
+                    {
+                        if (p == currentPage)
+                        {
+                            <li class="page-item active"><span class="page-link">@p</span></li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Applicants", new { id = ViewData["JobId"], search = ViewData["Search"], status = ViewData["StatusFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = p })">@p</a>
+                            </li>
+                        }
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Applicants", new { id = ViewData["JobId"], search = ViewData["Search"], status = ViewData["StatusFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = totalPages })">@totalPages</a>
+                        </li>
+                    }
+                }
+                <!-- Next Button -->
+                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                    @if (currentPage < totalPages)
+                    {
+                        <a class="page-link" href="@Url.Action("Applicants", new { id = ViewData["JobId"], search = ViewData["Search"], status = ViewData["StatusFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = currentPage + 1 })">Next</a>
+                    }
+                    else
+                    {
+                        <span class="page-link">Next</span>
+                    }
+                </li>
+            </ul>
+        </nav>
+
+        <div class="text-center mt-3 text-muted small">
+            Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalRecords) of @totalRecords applicants (Page @currentPage of @totalPages)
+        </div>
+    }
+</div>
+
+@functions {
+    string GetStatusBadgeColor(string status)
+    {
+        return status switch
+        {
+            "Applied" => "secondary",
+            "Shortlisted" => "warning",
+            "Hired" => "success",
+            "Rejected" => "danger",
+            _ => "secondary"
+        };
+    }
+}

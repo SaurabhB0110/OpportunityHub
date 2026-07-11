@@ -1,0 +1,139 @@
+@model OpportunityHub.Models.OpportunityDetailsViewModel
+@{
+    ViewData["Title"] = Model?.Opportunity?.Title ?? "Opportunity";
+    var job = Model?.Opportunity;
+    var isCandidate = User.IsInRole("Candidate");
+    var isSaved = ViewData["IsSaved"] as bool? ?? false;
+}
+<section class="details-hero"><div class="shell"><a class="back-link" asp-action="Index">← Back to opportunities</a><div class="detail-heading"><span class="company-logo large" style="--logo-color:@job.LogoColor">@job.Initials</span><div><div class="hiring-label"><i></i> Actively hiring</div><h1>@job.Title</h1><p>@job.Company</p></div>
+    @if (isCandidate)
+    {
+        <div>
+            @if (isSaved)
+            {
+                <form asp-action="UnsaveJob" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@job.Id" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details","Jobs", new { id = job.Id })" />
+                    <button type="submit" class="save-button save-large"><span>♥</span> Unsave</button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="SaveJob" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@job.Id" />
+                    <button type="submit" class="save-button save-large"><span>♡</span> Save</button>
+                </form>
+            }
+        </div>
+    }
+    else
+    {
+        <button type="button" class="save-button save-large" data-save-id="@job.Id"><span>♡</span> Save</button>
+    }
+</div><div class="detail-meta"><span>⌖ <b>@job.Location</b> · @job.WorkMode</span><span>◷ <b>@job.Type</b></span><span>◈ <b>@job.Compensation</b></span><span>♙ <b>@job.Experience</b></span></div></div></section>
+<section class="details-section"><div class="shell details-layout">
+    <article class="job-description">
+        @if (TempData["Success"] is string success) { <div class="success-banner"><span>✓</span><div><b>You're all set.</b><p>@success</p></div></div> }
+        @if (TempData["Error"] is string error) { <div class="alert alert-danger alert-dismissible fade show" role="alert"><strong>Error:</strong> @error<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div> }
+        <div class="content-block"><h2>About the opportunity</h2><p>@job.Description</p></div>
+        <div class="content-block"><h2>What you'll do</h2><ul>@foreach (var item in job.Responsibilities ?? Enumerable.Empty<string>()) { <li>@item</li> }</ul></div>
+        <div class="content-block"><h2>What we're looking for</h2><ul>@foreach (var item in job.Requirements ?? Enumerable.Empty<string>()) { <li>@item</li> }</ul></div>
+        <div class="content-block"><h2>Skills you'll use</h2><div class="skill-row detail-skills">@foreach (var skill in job.Skills ?? Enumerable.Empty<string>()) { <span>@skill</span> }</div></div>
+        <div class="content-block company-block"><span class="company-logo" style="--logo-color:@job.LogoColor">@job.Initials</span><div><small>ABOUT THE COMPANY</small><h2>@job.Company</h2><p>We're building an ambitious team around meaningful work, thoughtful collaboration, and plenty of room to grow.</p></div></div>
+    </article>
+    <aside class="apply-card">
+        @if (isCandidate && Model.HasApplied)
+        {
+            <!-- Candidate has already applied -->
+            <button class="btn btn-secondary w-100" disabled><span class="text-success">✓</span> Already Applied</button>
+            <p class="text-muted small mt-2">You have already applied for this job.</p>
+        }
+        else if (isCandidate)
+        {
+            <!-- Candidate can apply -->
+            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#applyModal">Apply now</button>
+        }
+        else if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <!-- Logged in but not a candidate -->
+            <div class="alert alert-info">
+                <p class="mb-0"><strong>Only candidates can apply</strong><br />Please log in as a candidate to apply for this opportunity.</p>
+            </div>
+        }
+        else
+        {
+            <!-- Not authenticated -->
+            <a href="@Url.Action("Login", "Account", new { returnUrl = Url.Action("Details", "Jobs", new { id = job.Id }) })" class="btn btn-primary w-100">Log in to apply</a>
+        }
+        <p class="deadline">Apply by <b>@job.ApplyBy.ToString("dd MMM yyyy")</b></p><hr /><div class="apply-stat"><span>◎</span><div><b>@job.Applicants applicants</b><small>You're in good company</small></div></div><div class="apply-stat"><span>◷</span><div><b>Posted @job.PostedLabel.ToLower()</b><small>Applications reviewed regularly</small></div></div><div class="safe-note"><span>♢</span><p><b>Apply safely</b><br />Never pay money to apply for a role.</p></div>
+    </aside>
+</div></section>
+@if (Model.Similar != null && Model.Similar.Count > 0) { <section class="section similar-section"><div class="shell"><div class="section-heading split"><div><span class="kicker">KEEP EXPLORING</span><h2>Similar opportunities</h2></div></div><div class="opportunity-grid">@foreach (var item in Model.Similar) { <partial name="_OpportunityCard" model="item" /> }</div></div></section> }
+
+@if (isCandidate && !Model.HasApplied)
+{
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content apply-modal">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <span class="kicker">YOUR NEXT STEP</span>
+          <h2 id="applyModalLabel">Apply for @job.Title</h2>
+          <p>Tell @job.Company a little about yourself.</p>
+
+          <form asp-action="Apply" asp-route-id="@job.Id" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label asp-for="Application.FullName"></label>
+                <input asp-for="Application.FullName" class="form-control" />
+                <span asp-validation-for="Application.FullName" class="text-danger"></span>
+              </div>
+
+              <div class="form-group">
+                <label asp-for="Application.Email"></label>
+                <input asp-for="Application.Email" class="form-control" />
+                <span asp-validation-for="Application.Email" class="text-danger"></span>
+              </div>
+
+              <div class="form-group">
+                <label asp-for="Application.Phone"></label>
+                <input asp-for="Application.Phone" class="form-control" />
+                <span asp-validation-for="Application.Phone" class="text-danger"></span>
+              </div>
+
+              <div class="form-group">
+                <label asp-for="Application.PortfolioUrl"></label>
+                <input asp-for="Application.PortfolioUrl" class="form-control" />
+                <span asp-validation-for="Application.PortfolioUrl" class="text-danger"></span>
+              </div>
+
+              <div class="form-group full">
+                <label asp-for="Application.CoverNote"></label>
+                <textarea asp-for="Application.CoverNote" class="form-control" rows="4" placeholder="Share what excites you about this role..."></textarea>
+                <span asp-validation-for="Application.CoverNote" class="text-danger"></span>
+              </div>
+
+              <div class="form-group full">
+                <label asp-for="Application.Resume">Upload resume (optional)</label>
+                <input asp-for="Application.Resume" type="file" class="form-control" />
+                <span asp-validation-for="Application.Resume" class="text-danger"></span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">Send application</button>
+            <small class="form-reassurance">Your details are shared only with this employer.</small>
+          </form>
+        </div>
+      </div>
+    </div>
+}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> @if (ViewData["OpenApplication"] is true) { <script>document.addEventListener('DOMContentLoaded',()=>bootstrap.Modal.getOrCreateInstance(document.getElementById('applyModal')).show());</script> } }
+var categories = new[] {
+    "Software Development","Web Development","Mobile Development","Cloud Computing","DevOps","Cyber Security",
+    "Data Science","Artificial Intelligence","Machine Learning","UI/UX Design","QA & Testing","Product Management",
+    "Sales","Marketing","Digital Marketing","Human Resources","Finance","Accounting","Customer Support",
+    "Business Development","Engineering","Healthcare","Education","Operations","Legal","Internship","Freelance"
+};

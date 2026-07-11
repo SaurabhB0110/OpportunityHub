@@ -1,0 +1,170 @@
+﻿@model OpportunityHub.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+  <div class="auth-split" role="main" aria-labelledby="login-heading">
+
+    <!-- LEFT: Information Panel -->
+    <aside class="split-left d-none d-lg-flex" aria-hidden="false">
+      <div class="left-card" role="region" aria-label="OpportunityHub info panel">
+        <div class="left-inner">
+
+          <!-- Logo + Brand (single instance) -->
+          <div class="left-logo">
+            <a class="nav-brand" asp-controller="Home" asp-action="Index">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" class="brand-logo">
+                <rect width="24" height="24" rx="6" fill="#2563EB"/>
+                <path d="M6 12h12" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <span class="nav-brand-text">OpportunityHub</span>
+            </a>
+          </div>
+
+          <!-- Single branding copy under logo -->
+          <div class="left-brand">
+            <p class="left-subhead">Connect with top employers.<br/>Apply to roles that match your ambition.</p>
+          </div>
+
+          <div class="left-illustration" aria-hidden="true">
+            <svg class="illus-graphic" viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" focusable="false">
+              <defs>
+                <linearGradient id="lgA" x1="0" x2="1">
+                  <stop offset="0" stop-color="#111827" />
+                  <stop offset="1" stop-color="#2563EB" />
+                </linearGradient>
+              </defs>
+              <rect width="720" height="360" rx="18" fill="url(#lgA)" opacity="0.04"/>
+              <g transform="translate(20,18)" opacity="0.12">
+                <circle cx="180" cy="50" r="60" fill="#fff"/>
+                <circle cx="420" cy="170" r="90" fill="#fff"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Feature rows -->
+          <ul class="left-features" role="list">
+            <li class="feature-row">
+              <div class="feature-icon glass"><i class="bi bi-search"></i></div>
+              <div class="feature-copy">
+                <strong>Find Jobs</strong>
+                <div class="small">Curated roles from trusted companies</div>
+              </div>
+            </li>
+
+            <li class="feature-row">
+              <div class="feature-icon glass"><i class="bi bi-lightning"></i></div>
+              <div class="feature-copy">
+                <strong>Apply Instantly</strong>
+                <div class="small">Quick applications with your uploaded resume</div>
+              </div>
+            </li>
+
+            <li class="feature-row">
+              <div class="feature-icon glass"><i class="bi bi-building"></i></div>
+              <div class="feature-copy">
+                <strong>Trusted Companies</strong>
+                <div class="small">Verified employers and transparent job listings</div>
+              </div>
+            </li>
+
+            <li class="feature-row">
+              <div class="feature-icon glass"><i class="bi bi-graph-up"></i></div>
+              <div class="feature-copy">
+                <strong>Track Applications</strong>
+                <div class="small">Monitor progress from applied to hired</div>
+              </div>
+            </li>
+          </ul>
+
+          <!-- Actions -->
+          <div class="left-actions">
+            <a class="btn btn-employer-pill" asp-controller="Account" asp-action="RegisterEmployer">Register as employer</a>
+            <a class="btn btn-candidate-link" asp-controller="Account" asp-action="RegisterCandidate">Create candidate account</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Login Panel -->
+    <main class="split-right d-flex align-items-center justify-content-center">
+      <div class="login-card" role="region" aria-labelledby="login-heading" style="max-width:470px;">
+        <div class="login-card-body">
+          <h3 id="login-heading" class="login-title">Welcome back</h3>
+          <p class="text-muted">Sign in to access your dashboard and applications</p>
+
+          <form asp-action="Login" method="post" novalidate>
+            <input asp-for="ReturnUrl" type="hidden" />
+            <div asp-validation-summary="All" class="form-error mb-3"></div>
+
+            <!-- EMAIL: normal label above input -->
+            <div class="mb-3">
+              <label asp-for="Email" class="form-label fw-500">Email address</label>
+              <div class="input-with-icon">
+                <span class="field-icon"><i class="bi bi-envelope"></i></span>
+                <input asp-for="Email" id="emailInput" class="form-control" />
+              </div>
+              <span asp-validation-for="Email" class="form-error text-danger small"></span>
+            </div>
+
+            <!-- PASSWORD: normal label above input (preserve ids) -->
+            <div class="mb-3">
+              <label asp-for="Password" class="form-label fw-500">Password</label>
+              <div class="input-with-icon password-wrap">
+                <span class="field-icon"><i class="bi bi-lock"></i></span>
+                <input asp-for="Password" id="passwordInput" class="form-control" />
+                <button type="button" class="btn pwd-toggle" id="togglePassword" tabindex="-1" aria-label="Show password">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <span asp-validation-for="Password" class="form-error text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center auth-row">
+              <div class="form-check">
+                <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                <label asp-for="RememberMe" class="form-check-label ms-1">Remember me</label>
+              </div>
+              <div>
+                <a class="link-secondary small" asp-controller="Account" asp-action="ForgotPassword">Forgot password?</a>
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button type="submit" class="btn btn-primary-sec">Log in</button>
+              <div class="or-sep">or</div>
+              <a asp-controller="Account" asp-action="RegisterCandidate" class="btn btn-outline-secondary">Create account</a>
+            </div>
+
+            <div class="text-center mt-2">
+              <small class="text-muted">Didn't receive confirmation? <a asp-controller="Account" asp-action="ResendConfirmationEmail">Resend</a></small>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+  <script>
+    (function () {
+      const pwd = document.getElementById('passwordInput');
+      const btn = document.getElementById('togglePassword');
+      if (!pwd || !btn) return;
+      btn.addEventListener('click', function () {
+        if (pwd.type === 'password') {
+          pwd.type = 'text';
+          btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+        } else {
+          pwd.type = 'password';
+          btn.innerHTML = '<i class="bi bi-eye"></i>';
+        }
+      });
+    })();
+  </script>
+}

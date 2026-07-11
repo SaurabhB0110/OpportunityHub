@@ -1,0 +1,22 @@
+﻿@model IEnumerable<OpportunityHub.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Manage Candidates";
+}
+
+<div class="container py-5">
+    <h1>Manage Candidates</h1>
+    <table class="table">
+        <thead><tr><th>Full name</th><th>Email</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.FullName</td>
+                    <td>@c.Email</td>
+                    <td><!-- management actions --></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

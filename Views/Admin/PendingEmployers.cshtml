@@ -1,0 +1,51 @@
+@model IEnumerable<OpportunityHub.Models.EmployerProfile>
+
+@{
+    ViewData["Title"] = "Pending Employers";
+}
+
+<div class="container py-5">
+    <h1>Pending Employer Verifications</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Employer Email</th>
+                <th>Employer ID</th>
+                <th>Document</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.CompanyName</td>
+                    <td>@p.User?.Email</td>
+                    <td>@p.EmployerId</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(p.VerificationDocumentUrl))
+                        {
+                            <a target="_blank" href="@p.VerificationDocumentUrl">View</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No document</span>
+                        }
+                    </td>
+                    <td>
+                        <form asp-action="ApproveEmployer" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button class="btn btn-sm btn-success" type="submit">Approve</button>
+                        </form>
+                        <form asp-action="RejectEmployer" method="post" style="display:inline" class="ms-2">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button class="btn btn-sm btn-danger" type="submit">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

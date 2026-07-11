@@ -1,0 +1,189 @@
+@model OpportunityHub.Models.BrowseViewModel
+@{
+    ViewData["Title"] = "Browse opportunities";
+    var categories = new[] {
+        "Software Development",
+        "Web Development",
+        "Mobile Development",
+        "Cloud Computing",
+        "DevOps",
+        "Cyber Security",
+        "Data Science",
+        "AI & Machine Learning",
+        "UI/UX Design",
+        "Product Management",
+        "Business Analysis",
+        "Quality Assurance",
+        "Database Administration",
+        "Networking",
+        "Technical Support",
+        "Digital Marketing",
+        "Graphic Design",
+        "Content Writing",
+        "Human Resources",
+        "Finance",
+        "Sales",
+        "Customer Support",
+        "Operations",
+        "Project Management",
+        "Others"
+    };
+    var workModes = new[] { "Remote", "Hybrid", "On-site" };
+}
+
+<section class="page-hero compact">
+    <div class="shell">
+        <span class="kicker">MAKE YOUR NEXT MOVE</span>
+        <h1>Find your opportunity</h1>
+        <p>Thoughtful roles at teams where you can do work that matters.</p>
+    </div>
+</section>
+
+<section class="browse-section">
+    <div class="shell">
+        <!-- Top Search Bar - Separate Form -->
+        <form class="browse-search" method="get">
+            <label>
+                <span>⌕</span>
+                <input name="q" value="@Model.Query" placeholder="Role, skill, or company" />
+            </label>
+            <label>
+                <span>⌖</span>
+                <input name="location" value="@Model.Location" placeholder="City or remote" />
+            </label>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <!-- Main Filter Form - Wraps filter panel and results -->
+        <form method="get" class="browse-form">
+            <div class="browse-layout">
+                <!-- Filter Panel - Inside the main form -->
+                <aside class="filter-panel">
+                    <div class="filter-title">
+                        <strong>Filters</strong>
+                        <a href="@Url.Action("Index")">Clear all</a>
+                    </div>
+
+                    <!-- Preserve search and location from top search bar -->
+                    <input type="hidden" name="q" value="@Model.Query" />
+                    <input type="hidden" name="location" value="@Model.Location" />
+
+                    <div>
+                        <label class="filter-label">Work Mode</label>
+                        <select name="workMode" class="form-select">
+                            <option value="">Any mode</option>
+                            @foreach (var wm in workModes)
+                            {
+                                <option value="@wm" selected="@(Model.WorkMode == wm)">@wm</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="filter-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="">Any type</option>
+                            @foreach (var t in new[] { "Full-time", "Part-time", "Contract", "Internship" })
+                            {
+                                <option value="@t" selected="@(Model.Type == t)">@t</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="filter-label">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="">Any category</option>
+                            @foreach (var cat in categories)
+                            {
+                                <option value="@cat" selected="@(Model.Category == cat)">@cat</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="filter-label">Sort By</label>
+                        <select name="sort" class="form-select">
+                            <option value="newest" selected="@(Model.Sort == "newest")">Newest first</option>
+                            <option value="oldest" selected="@(Model.Sort == "oldest")">Oldest first</option>
+                            <option value="salary_high" selected="@(Model.Sort == "salary_high")">Highest salary</option>
+                            <option value="salary_low" selected="@(Model.Sort == "salary_low")">Lowest salary</option>
+                        </select>
+                    </div>
+
+                    <!-- Apply Filters Button - Inside the form -->
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Apply Filters</button>
+                </aside>
+
+                <!-- Results Area - Inside the main form for consistency -->
+                <div>
+                    @if (Model.Opportunities.Any())
+                    {
+                        <div class="results-heading">
+                            <h2>@Model.Opportunities.Count results found</h2>
+                            @if (!string.IsNullOrEmpty(Model.Query) || !string.IsNullOrEmpty(Model.Location) || !string.IsNullOrEmpty(Model.WorkMode) || !string.IsNullOrEmpty(Model.Type) || !string.IsNullOrEmpty(Model.Category))
+                            {
+                                <p>
+                                    Showing results for:
+                                    @if (!string.IsNullOrEmpty(Model.Query))
+                                    {
+                                        <span class="badge badge-neutral">@Model.Query</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Location))
+                                    {
+                                        <span class="badge badge-neutral">@Model.Location</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.WorkMode))
+                                    {
+                                        <span class="badge badge-neutral">@Model.WorkMode</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Type))
+                                    {
+                                        <span class="badge badge-neutral">@Model.Type</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(Model.Category))
+                                    {
+                                        <span class="badge badge-neutral">@Model.Category</span>
+                                    }
+                                </p>
+                            }
+                        </div>
+
+                        <div class="opportunity-grid browse-grid">
+                            @foreach (var opp in Model.Opportunities)
+                            {
+                                <a href="@Url.Action("Details", "Jobs", new { id = opp.Id })" class="opportunity-card">
+                                    <div class="card-top">
+                                        <div class="company-logo" style="--logo-color: @opp.LogoColor">@opp.Initials</div>
+                                    </div>
+                                    <h3>@opp.Title</h3>
+                                    <p class="company-name">@opp.Company</p>
+                                    <div class="job-meta">
+                                        <span>📍 @opp.Location</span>
+                                        <span>💼 @opp.Type</span>
+                                        <span>💰 @opp.Compensation</span>
+                                    </div>
+                                    <div class="card-bottom">
+                                        <span>@opp.Applicants applicants</span>
+                                        <span>@opp.PostedLabel</span>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("_EmptyState",
+                        new OpportunityHub.Models.EmptyStateViewModel
+                        {
+                            Title = "No opportunities found",
+                            Message = "Try adjusting your search or filters.",
+                            ButtonText = "Browse all jobs",
+                            ButtonUrl = Url.Action("Index")
+                        })
+                                        }
+                </div>
+            </div>
+        </form>
+    </div>
+</section>

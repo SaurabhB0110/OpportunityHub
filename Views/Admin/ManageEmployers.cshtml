@@ -1,0 +1,269 @@
+@model IReadOnlyList<OpportunityHub.Models.EmployerProfile>
+
+@{
+    ViewData["Title"] = "Manage Employers";
+}
+
+<div class="container-fluid py-5 admin-dashboard">
+    <!-- Header -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="display-6 fw-bold mb-1">Manage Employers</h1>
+            <p class="text-muted small mb-0">View, approve, and moderate employer accounts</p>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Search and Filter -->
+    <div class="card-modern mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-5">
+                    <label class="form-label visually-hidden">Search</label>
+                    <input type="text" name="search" class="form-control" placeholder="Search by company name or email..." value="@ViewBag.Search" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label visually-hidden">Filter</label>
+                    <select name="filter" class="form-select">
+                        @if (ViewBag.Filter == "")
+                        {
+                            <option value="" selected>All Employers</option>
+                        }
+                        else
+                        {
+                            <option value="">All Employers</option>
+                        }
+
+                        @if (ViewBag.Filter == "verified")
+                        {
+                            <option value="verified" selected>Verified Only</option>
+                        }
+                        else
+                        {
+                            <option value="verified">Verified Only</option>
+                        }
+
+                        @if (ViewBag.Filter == "pending")
+                        {
+                            <option value="pending" selected>Pending Only</option>
+                        }
+                        else
+                        {
+                            <option value="pending">Pending Only</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-50"><i class="bi bi-search"></i> Search</button>
+                    <a href="@Url.Action("ManageEmployers")" class="btn btn-light w-50"><i class="bi bi-x-lg"></i> Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Employers Table -->
+    <div class="card-modern">
+        <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold">All Employers (@ViewBag.TotalRecords)</h6>
+            <div class="text-muted small">Showing page @ViewBag.CurrentPage of @ViewBag.TotalPages</div>
+        </div>
+
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive-modern">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Company</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Jobs Posted</th>
+                                <th>Registered</th>
+                                <th class="pe-4 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var employer in Model)
+                            {
+                                var isDisabled = employer.User?.LockoutEnd != null && employer.User.LockoutEnd > DateTimeOffset.UtcNow;
+                                var jobCount = 0;
+                                var jobCountsDict = ViewBag.JobCounts as System.Collections.Generic.IDictionary<string, int>;
+                                if (jobCountsDict != null && !string.IsNullOrEmpty(employer.CompanyName) && jobCountsDict.TryGetValue(employer.CompanyName, out var jc))
+                                {
+                                    jobCount = jc;
+                                }
+
+                                <tr>
+                                    <td class="ps-4 fw-semibold">@employer.CompanyName</td>
+                                    <td>@(employer.User?.Email ?? "N/A")</td>
+                                    <td>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            @if (employer.IsVerified)
+                                            {
+                                                <span class="badge badge-success">Approved</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning">Pending</span>
+                                            }
+
+                                            @if (isDisabled)
+                                            {
+                                                <span class="badge badge-danger">Inactive</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-info">Active</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-neutral">@jobCount</span>
+                                    </td>
+                                    <td>@employer.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td class="pe-4 text-end">
+                                        <div class="btn-group" role="group" aria-label="Actions for @employer.CompanyName">
+                                            <a asp-controller="Admin" asp-action="ViewEmployerProfile" asp-route-id="@employer.Id" class="btn btn-light btn-small" title="View Profile">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            @if (!employer.IsVerified)
+                                            {
+                                                <form method="post" action="@Url.Action("ApproveEmployer")" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@employer.Id" />
+                                                    <input type="hidden" name="search" value="@ViewBag.Search" />
+                                                    <input type="hidden" name="filter" value="@ViewBag.Filter" />
+                                                    <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                                                    <button type="submit" class="btn btn-success btn-small" title="Approve Employer">
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (!employer.IsVerified)
+                                            {
+                                                <form method="post" action="@Url.Action("RejectEmployer")" style="display: inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@employer.Id" />
+                                                    <input type="hidden" name="search" value="@ViewBag.Search" />
+                                                    <input type="hidden" name="filter" value="@ViewBag.Filter" />
+                                                    <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                                                    <button type="submit" class="btn btn-danger btn-small" title="Reject Employer">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form method="post" action="@Url.Action("ToggleEmployerStatus")" style="display: inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@employer.Id" />
+                                                <input type="hidden" name="search" value="@ViewBag.Search" />
+                                                <input type="hidden" name="filter" value="@ViewBag.Filter" />
+                                                <input type="hidden" name="page" value="@ViewBag.CurrentPage" />
+                                                <button type="submit" class="btn btn-light btn-small" title="@(isDisabled ? "Enable Account" : "Disable Account")">
+                                                    @if (isDisabled)
+                                                    {
+                                                        <i class="bi bi-toggle-on text-success"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-toggle-off text-secondary"></i>
+                                                    }
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (ViewBag.TotalPages > 1)
+                {
+                    <nav class="d-flex justify-content-center mt-4 pb-3">
+                        <ul class="pagination">
+                            @if (ViewBag.CurrentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageEmployers", new { page = 1, search = ViewBag.Search, filter = ViewBag.Filter })">First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageEmployers", new { page = ViewBag.CurrentPage - 1, search = ViewBag.Search, filter = ViewBag.Filter })">Previous</a>
+                                </li>
+                            }
+
+                            @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                            {
+                                @if (i == ViewBag.CurrentPage)
+                                {
+                                    <li class="page-item active"><span class="page-link">@i</span></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("ManageEmployers", new { page = i, search = ViewBag.Search, filter = ViewBag.Filter })">@i</a>
+                                    </li>
+                                }
+                            }
+
+                            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageEmployers", new { page = ViewBag.CurrentPage + 1, search = ViewBag.Search, filter = ViewBag.Filter })">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("ManageEmployers", new { page = ViewBag.TotalPages, search = ViewBag.Search, filter = ViewBag.Filter })">Last</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="empty-state-container text-center p-5 m-4">
+                    <div class="empty-state-icon"><i class="bi bi-building" style="font-size:2.4rem;"></i></div>
+                    <h3 class="empty-state-title">No employers found</h3>
+                    <p class="empty-state-description">There are no employers matching your search or filters. Try adjusting your search criteria.</p>
+                    <a class="btn btn-primary mt-3" asp-controller="Admin" asp-action="PendingEmployers"><i class="bi bi-hourglass-split"></i> View Pending Employers</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // small JS: highlight action buttons on keyboard focus for accessibility
+        (function () {
+            document.addEventListener('focusin', (e) => {
+                const btn = e.target.closest('.btn');
+                if (btn) btn.classList.add('focus-visible');
+            });
+            document.addEventListener('focusout', (e) => {
+                const btn = e.target.closest('.btn');
+                if (btn) btn.classList.remove('focus-visible');
+            });
+        })();
+    </script>
+}

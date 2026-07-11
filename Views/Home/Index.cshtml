@@ -1,0 +1,111 @@
+@model OpportunityHub.Models.HomeViewModel
+@inject OpportunityHub.Services.IOpportunityRepository Repository
+
+@{
+    ViewData["Title"] = "Find work that moves you forward";
+}
+
+<section class="hero">
+    <div class="hero-orb orb-one"></div><div class="hero-orb orb-two"></div>
+    <div class="shell hero-grid">
+        <div class="hero-copy">
+            <div class="eyebrow"><span></span> Opportunities for every ambition</div>
+            <h1>Find work that<br />moves you <em>forward.</em></h1>
+            <p>Discover internships and jobs where you can learn, contribute, and build a career you're proud of.</p>
+
+            <form class="search-bar" asp-controller="Jobs" asp-action="Index" method="get">
+                <label class="search-field"><span>⌕</span><input name="q" aria-label="Search by role or skill" placeholder="Role, skill, or company" /></label>
+                <label class="search-field location"><span>⌖</span><input name="location" aria-label="Search by location" placeholder="City or remote" /></label>
+                <button class="btn btn-primary" type="submit">Find Jobs</button>
+                <a class="btn btn-outline-primary ms-3" asp-controller="Employer" asp-action="Create">Post Jobs</a>
+            </form>
+
+            <div class="popular-searches"><b>Popular:</b><a asp-controller="Jobs" asp-action="Index" asp-route-q="Design">Design</a><a asp-controller="Jobs" asp-action="Index" asp-route-q="Marketing">Marketing</a><a asp-controller="Jobs" asp-action="Index" asp-route-q="Developer">Development</a><a asp-controller="Jobs" asp-action="Index" asp-route-location="Remote">Remote</a></div>
+        </div>
+
+        <div class="hero-visual" aria-label="Featured opportunity preview">
+            <div class="mini-card float-card-one"><span class="mini-icon">✓</span><div><b>Verified companies</b><small>Opportunities you can trust</small></div></div>
+            <div class="candidate-portrait">
+                <div class="portrait-art"><span class="sun"></span><span class="head"></span><span class="hair"></span><span class="body-shape"></span><span class="laptop"></span></div>
+                <div class="status-pill"><i></i> Open to opportunities</div>
+            </div>
+            <div class="mini-card float-card-two"><span class="mini-icon coral">↗</span><div><b>@Model.OpportunityCount roles</b><small>Fresh opportunities added</small></div></div>
+        </div>
+    </div>
+
+    <div class="shell trust-row"><span>Trusted by talent joining</span><b>NovaStack</b><b>PixelCraft</b><b>GreenBasket</b><b>CloudMint</b><b>FinEdge</b></div>
+</section>
+
+<section class="section">
+    <div class="shell">
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted">Jobs Available</h6>
+                    <div class="display-6 fw-bold">@Model.OpportunityCount</div>
+                    <small class="text-muted">Live roles across categories</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card text-center">
+                    <h6 class="text-muted">Companies Registered</h6>
+                    <div class="display-6 fw-bold">@Repository.GetAll().Select(o => o.Company).Distinct().Count()</div>
+                    <small class="text-muted">Organizations hiring</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section featured-section">
+    <div class="shell">
+        <div class="section-heading split">
+            <div><span class="kicker">HANDPICKED FOR YOU</span><h2>Opportunities worth exploring</h2></div>
+            <a class="text-link" asp-controller="Jobs" asp-action="Index">View all opportunities <span>→</span></a>
+        </div>
+
+        <div class="opportunity-grid">
+            @foreach (var opportunity in Model.Featured) { <partial name="_OpportunityCard" model="opportunity" /> }
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="shell">
+        <div class="section-heading"><div><span class="kicker">CATEGORIES</span><h2>Browse by job type</h2></div></div>
+
+        <div class="category-grid">
+            <a class="category-card" asp-controller="Jobs" asp-action="Index" asp-route-type="Internship"><span class="category-icon lavender">⌘</span><span><b>Internships</b><small>Short-term, learning roles</small></span><i>→</i></a>
+            <a class="category-card" asp-controller="Jobs" asp-action="Index" asp-route-type="Full-time"><span class="category-icon blue">⌘</span><span><b>Full-time</b><small>Long-term opportunities</small></span><i>→</i></a>
+            <a class="category-card" asp-controller="Jobs" asp-action="Index" asp-route-type="Part-time"><span class="category-icon mint">⌘</span><span><b>Part-time</b><small>Flexible schedules</small></span><i>→</i></a>
+            <a class="category-card" asp-controller="Jobs" asp-action="Index" asp-route-location="Remote"><span class="category-icon rose">⌘</span><span><b>Remote</b><small>Work from anywhere</small></span><i>→</i></a>
+            <a class="category-card" asp-controller="Jobs" asp-action="Index" asp-route-q="Fresher"><span class="category-icon peach">⌘</span><span><b>Freshers</b><small>Roles for early-career</small></span><i>→</i></a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="shell">
+        <div class="section-heading"><div><span class="kicker">TOP COMPANIES</span><h2>Hiring on OpportunityHub</h2><p>Companies actively recruiting motivated talent.</p></div></div>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            @foreach (var company in Repository.GetAll().Select(x => x.Company).Distinct().Take(8))
+            {
+                var initials = company.Length >= 3 ? company.Substring(0, 3).ToUpper() : company.ToUpper();
+                <div class="company-logo-mini bg-primary text-white">@initials</div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section how-section">
+    <div class="shell how-grid">
+        <div><span class="kicker">SIMPLE BY DESIGN</span><h2>Your next chapter,<br />in three easy steps.</h2><p>No endless forms. No confusing processes. Just a simpler path to the right opportunity.</p><a class="btn btn-primary" asp-controller="Jobs" asp-action="Index">Start exploring</a></div>
+        <div class="steps">
+            <div class="step"><span>01</span><div><b>Explore what fits</b><p>Search roles by your interests, skills, location, and goals.</p></div></div>
+            <div class="step"><span>02</span><div><b>Tell your story</b><p>Apply with the strengths and experiences that make you, you.</p></div></div>
+            <div class="step"><span>03</span><div><b>Make your move</b><p>Connect with great teams and take your next step forward.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section"><div class="shell"><div class="cta-card"><div><span class="kicker">FOR EMPLOYERS</span><h2>Great teams start with<br />the right people.</h2><p>Reach motivated candidates who are ready to learn, contribute, and grow with you.</p><a class="btn btn-light" asp-controller="Employer" asp-action="Create">Post an opportunity <span>→</span></a></div><div class="cta-art"><span class="circle-card">OH</span><span class="person person-one"></span><span class="person person-two"></span><span class="spark">✦</span></div></div></div></section>

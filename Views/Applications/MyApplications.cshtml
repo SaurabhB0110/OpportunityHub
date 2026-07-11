@@ -1,0 +1,220 @@
+﻿@model List<OpportunityHub.Models.JobApplication>
+@{
+    ViewData["Title"] = "My Applications";
+
+    var q = ViewData["Query"]?.ToString() ?? string.Empty;
+    var status = ViewData["Status"]?.ToString() ?? "All";
+    var sort = ViewData["Sort"]?.ToString() ?? "latest";
+    var page = (int)(ViewData["Page"] ?? 1);
+    var pageSize = (int)(ViewData["PageSize"] ?? 10);
+    var totalPages = (int)(ViewData["TotalPages"] ?? 1);
+    var totalCount = (int)(ViewData["TotalCount"] ?? Model.Count);
+}
+
+<div class="container-fluid py-5">
+    @await Html.PartialAsync("_Alerts")
+
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 fw-bold mb-2">My Applications</h1>
+            <p class="text-muted lead">Track your job applications and their status</p>
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-5">
+            <label class="form-label small">Search</label>
+            <input name="q" value="@q" class="form-control" placeholder="Search by job title or company" />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label small">Status</label>
+            <select name="status" class="form-select">
+                @{
+                    string[] statuses = new[] { "All", "Applied", "Pending", "Under Review", "Shortlisted", "Rejected", "Hired", "Withdrawn" };
+                    foreach (var s in statuses)
+                    {
+                        if (string.Equals(s, status, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <option value="@s" selected="selected">@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label small">Sort</label>
+            <select name="sort" class="form-select">
+                @{
+                    if (sort == "latest")
+                    {
+                        <option value="latest" selected="selected">Latest First</option>
+                        <option value="oldest">Oldest First</option>
+                    }
+                    else
+                    {
+                        <option value="latest">Latest First</option>
+                        <option value="oldest" selected="selected">Oldest First</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    @if (!Model.Any())
+    {
+        @await Html.PartialAsync("_EmptyState",
+            new OpportunityHub.Models.EmptyStateViewModel
+            {
+                Title = "No applications yet",
+                Message = "Start exploring opportunities and apply to positions that interest you.",
+                ButtonText = "Browse jobs",
+                ButtonUrl = Url.Action("Index", "Jobs")
+            })
+    }
+    else
+    {
+        <div class="table-responsive-modern">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                        <th>Resume</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@(app.Opportunity?.Title ?? "—")</td>
+                            <td>@(app.Opportunity?.Company ?? "—")</td>
+                            <td>@app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                            <td>
+                                @switch (app.Status)
+                                {
+                                    case "Applied":
+                                        <text><span class="badge bg-primary">Applied</span></text>
+                                        break;
+                                    case "Pending":
+                                    case "Reviewed":
+                                    case "Under Review":
+                                        <text><span class="badge bg-warning text-dark">@app.Status</span></text>
+                                        break;
+                                    case "Shortlisted":
+                                        <text><span class="badge bg-success">Shortlisted</span></text>
+                                        break;
+                                    case "Rejected":
+                                        <text><span class="badge bg-danger">Rejected</span></text>
+                                        break;
+                                    case "Hired":
+                                        <text><span class="badge bg-success">Hired</span></text>
+                                        break;
+                                    case "Withdrawn":
+                                        <text><span class="badge bg-secondary">Withdrawn</span></text>
+                                        break;
+                                    default:
+                                        <text><span class="badge bg-secondary">@app.Status</span></text>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(app.ResumeUrl))
+                                {
+                                    <a class="btn btn-sm btn-light" asp-controller="Applications" asp-action="DownloadResume" asp-route-applicationId="@app.Id" target="_blank">
+                                        <span>📄</span> View
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a class="btn btn-sm btn-outline-primary" asp-controller="Jobs" asp-action="Details" asp-route-id="@app.OpportunityId">View Job</a>
+
+                                    @* Withdraw button: only show for Applied, Pending, Under Review *@
+                                    @{
+                                        var canWithdraw = app.Status == "Applied" || app.Status == "Pending" || app.Status == "Under Review" || app.Status == "Reviewed";
+                                    }
+                                    @if (canWithdraw)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#withdrawModal_@app.Id">
+                                            Withdraw
+                                        </button>
+
+                                        <div class="modal fade" id="withdrawModal_@app.Id" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Withdraw Application</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Are you sure you want to withdraw your application for <strong>@(app.Opportunity?.Title ?? "this position")</strong>?</p>
+                                                        <p class="text-muted small mb-0">You can apply again after withdrawal.</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                        <form asp-controller="Applications" asp-action="Withdraw" method="post" style="display: inline;">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="applicationId" value="@app.Id" />
+                                                            <button type="submit" class="btn btn-danger">Withdraw Application</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">Showing page @(page) of @(totalPages) — @(totalCount) applications</div>
+            <nav>
+                <ul class="pagination mb-0">
+                    @{
+                        var prevDisabled = page <= 1;
+                    }
+                    <li class="page-item @(prevDisabled ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("MyApplications", "Applications", new { q = q, status = status, sort = sort, page = page - 1 })">Previous</a>
+                    </li>
+
+                    @for (var i = 1; i <= totalPages; i++)
+                    {
+                        var isActive = i == page;
+                        <li class="page-item @(isActive ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("MyApplications", "Applications", new { q = q, status = status, sort = sort, page = i })">@i</a>
+                        </li>
+                    }
+
+                    @{
+                        var nextDisabled = page >= totalPages;
+                    }
+                    <li class="page-item @(nextDisabled ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("MyApplications", "Applications", new { q = q, status = status, sort = sort, page = page + 1 })">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

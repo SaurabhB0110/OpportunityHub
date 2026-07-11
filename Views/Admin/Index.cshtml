@@ -1,0 +1,136 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-5 admin-dashboard">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-6 fw-bold mb-1">Admin Dashboard</h1>
+            <p class="text-muted small mb-0">Overview — platform activity and moderation tools</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a class="btn btn-outline-primary btn-small" asp-controller="Admin" asp-action="PendingEmployers"><i class="bi bi-hourglass-split"></i> Pending Employers</a>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-primary text-white"><i class="bi bi-people-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Total Users</div>
+                    <div class="h3 mb-0 fw-bold">@(ViewBag.TotalUsers ?? 0)</div>
+                    <div class="text-sm text-muted mt-1">All registered users</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-info text-white"><i class="bi bi-building"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Employers</div>
+                    <div class="h3 mb-0 fw-bold">@(ViewBag.TotalEmployers ?? 0)</div>
+                    <div class="text-sm text-muted mt-1">Verified & pending companies</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-success text-white"><i class="bi bi-person-badge-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Candidates</div>
+                    <div class="h3 mb-0 fw-bold">@(ViewBag.TotalCandidates ?? 0)</div>
+                    <div class="text-sm text-muted mt-1">Active candidate accounts</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-warning text-white"><i class="bi bi-briefcase-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Jobs Posted</div>
+                    <div class="h3 mb-0 fw-bold">@(ViewBag.TotalJobsPosted ?? 0)</div>
+                    <div class="text-sm text-muted mt-1">Open opportunities on platform</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Sections -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">Pending Employers</h6>
+                    <a class="btn btn-sm btn-primary" asp-controller="Admin" asp-action="PendingEmployers"><i class="bi bi-eye"></i> View All</a>
+                </div>
+                <div class="py-4 text-center">
+                    <div class="h2 mb-1">@(ViewBag.PendingEmployers ?? 0)</div>
+                    <div class="text-muted">Employers awaiting verification</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">Manage Employers</h6>
+                    <a class="btn btn-sm btn-primary" asp-controller="Admin" asp-action="ManageEmployers"><i class="bi bi-building"></i> Manage</a>
+                </div>
+                <div class="py-4 text-center">
+                    <div class="text-muted">Quick access to employer accounts and profiles</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">Manage Candidates</h6>
+                    <a class="btn btn-sm btn-primary" asp-controller="Admin" asp-action="ManageCandidates"><i class="bi bi-people"></i> View</a>
+                </div>
+                <div class="py-4 text-center">
+                    <div class="text-muted">Browse and manage candidate profiles</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0 fw-bold">Reports</h6>
+                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-bar-chart-line"></i> Generate</button>
+                </div>
+                <div class="py-4 text-center">
+                    <div class="text-muted">Platform statistics and analytics</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // small enhancement: animate KPI cards on entry
+        (function () {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.kpi-card').forEach((c, i) => {
+                    c.style.opacity = 0;
+                    c.style.transform = 'translateY(6px)';
+                    setTimeout(() => {
+                        c.style.transition = 'all .45s cubic-bezier(.2,.9,.3,1)';
+                        c.style.opacity = 1;
+                        c.style.transform = 'translateY(0)';
+                    }, 80 * i);
+                });
+            });
+        })();
+    </script>
+}

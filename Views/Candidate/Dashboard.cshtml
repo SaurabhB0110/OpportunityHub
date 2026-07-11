@@ -1,0 +1,194 @@
+﻿@model OpportunityHub.Models.ApplicationUser
+@{
+    ViewData["Title"] = "My Dashboard";
+}
+
+@section Scripts {
+    <script>
+        function calculateCompletion() {
+            const fields = [
+                '@Model.FullName',
+                '@Model.PhoneNumber',
+                '@Model.Address',
+                '@Model.Skills',
+                '@Model.GraduationDegree',
+                '@Model.GraduationCollege',
+                '@Model.GraduationCgpaOrPercentage',
+                '@Model.ResumeUrl'
+            ];
+            const completed = fields.filter(f => f && f.trim()).length;
+            return Math.round((completed / 8) * 100);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const completion = calculateCompletion();
+            const progressBar = document.querySelector('.profile-progress-bar');
+            if (progressBar) {
+                progressBar.style.width = completion + '%';
+                progressBar.textContent = completion + '%';
+            }
+        });
+    </script>
+}
+
+<div class="container-fluid py-5 candidate-dashboard">
+    @await Html.PartialAsync("_Alerts")
+
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-6 fw-bold mb-1">Welcome back! 👋</h1>
+            <p class="text-muted small mb-0">@(Model.FullName ?? "Candidate")</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("Edit", "Candidate")" class="btn btn-primary btn-small"><i class="bi bi-pencil-square"></i> Edit Profile</a>
+        </div>
+    </div>
+
+    <!-- Top Row: Profile Strength + KPI / Recent -->
+    <div class="row mb-5 g-4">
+        <div class="col-lg-4">
+            <div class="card-modern candidate-profile-card text-center">
+                <h6 class="text-sm fw-bold mb-3">Profile Strength</h6>
+                <div class="profile-progress-visual mx-auto mb-3" aria-hidden="true">
+                    <svg viewBox="0 0 100 100" class="profile-progress-svg">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#e9e8ee" stroke-width="6" />
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#635bff" stroke-width="6" stroke-dasharray="141.3" stroke-dashoffset="0" class="profile-progress-circle" />
+                    </svg>
+                    <div class="profile-progress-text">
+                        <div class="fw-bold profile-progress-bar">80%</div>
+                        <small class="text-muted d-block">Complete</small>
+                    </div>
+                </div>
+
+                <a href="@Url.Action("Edit", "Candidate")" class="btn btn-secondary btn-small w-100">Complete Profile</a>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card-modern">
+                <h6 class="text-sm fw-bold mb-3">Recent Applications</h6>
+                @{
+                    var recentApps = Model.Applications?.OrderByDescending(a => a.AppliedAt).Take(3).ToList();
+                }
+                @if (recentApps?.Any() == true)
+                {
+                    <div class="table-responsive-modern">
+                        <table class="table candidate-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Opportunity</th>
+                                    <th>Company</th>
+                                    <th>Status</th>
+                                    <th>Applied</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var app in recentApps)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@(app.Opportunity?.Title ?? "Unknown")</td>
+                                        <td class="text-muted">@(app.Opportunity?.Company ?? "Unknown")</td>
+                                        <td>
+                                            @if (app.Status == "Applied")
+                                            {
+                                                <span class="badge badge-info">Applied</span>
+                                            }
+                                            else if (app.Status == "Reviewed")
+                                            {
+                                                <span class="badge badge-warning">Reviewed</span>
+                                            }
+                                            else if (app.Status == "Accepted")
+                                            {
+                                                <span class="badge badge-success">Accepted</span>
+                                            }
+                                        </td>
+                                        <td>@app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-sm btn-light" href="@Url.Action("Applicants", new { id = app.OpportunityId })" title="View applicants">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-3">
+                        <a href="@Url.Action("MyApplications", "Applications")" class="btn btn-small btn-ghost">View all applications →</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state-container text-center p-5 m-4">
+                        <div class="empty-state-icon"><i class="bi bi-briefcase" style="font-size:2.2rem;"></i></div>
+                        <h3 class="empty-state-title">No applications yet</h3>
+                        <p class="empty-state-description">Start exploring opportunities and apply to the roles you love.</p>
+                        <a class="btn btn-primary mt-3" href="@Url.Action("Index", "Jobs")"><i class="bi bi-search"></i> Explore Jobs</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills & Resume -->
+    <div class="row mb-5 g-4">
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <h6 class="text-sm fw-bold mb-3">Skills</h6>
+                @if (!string.IsNullOrEmpty(Model.Skills))
+                {
+                    <div class="skill-row">
+                        @foreach (var skill in Model.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            <span class="badge badge-neutral">@skill.Trim()</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">Add your skills to improve visibility</div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card-modern">
+                <h6 class="text-sm fw-bold mb-3">Resume</h6>
+                @if (!string.IsNullOrEmpty(Model.ResumeUrl))
+                {
+                    <p class="text-success fw-bold">✓ Resume uploaded</p>
+                    <a href="@Model.ResumeUrl" target="_blank" class="btn btn-small btn-light">View Resume</a>
+                }
+                else
+                {
+                    <div class="text-muted">Upload your resume to make it easier for employers to review you</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Education -->
+    <div class="row">
+        <div class="col">
+            <div class="card-modern">
+                <h6 class="text-sm fw-bold mb-3">Education</h6>
+                @if (!string.IsNullOrEmpty(Model.GraduationCollege))
+                {
+                    <div class="py-2">
+                        <strong>@Model.GraduationDegree</strong>
+                        <div class="text-muted">@Model.GraduationCollege</div>
+                        @if (!string.IsNullOrEmpty(Model.GraduationCgpaOrPercentage))
+                        {
+                            <small class="text-muted">CGPA: @Model.GraduationCgpaOrPercentage</small>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted">Add your education details</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

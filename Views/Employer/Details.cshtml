@@ -1,0 +1,96 @@
+@model OpportunityHub.Models.JobApplication
+@{
+    ViewData["Title"] = "Applicant Details";
+    var app = Model;
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="h3 fw-bold mb-1">@app.CandidateName</h1>
+            <p class="text-muted mb-0">@app.CandidateEmail</p>
+            @if (!string.IsNullOrEmpty(app.Candidate?.PhoneNumber))
+            {
+                <p class="text-muted mt-1">Phone: @app.Candidate?.PhoneNumber</p>
+            }
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("Applicants", new { id = app.OpportunityId })" class="btn btn-outline-secondary">Back to Applicants</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5 class="mb-1">@app.Opportunity?.Title ?? "Job"</h5>
+                        <small class="text-muted">@app.Opportunity?.Company ?? "—"</small>
+                    </div>
+
+                    <div class="mb-3 d-flex align-items-center gap-3">
+                        <span class="badge bg-@GetStatusBadgeColor(app.Status)">@app.Status</span>
+                        <small class="text-muted">Applied: @app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Cover Letter</h6>
+                        @if (!string.IsNullOrEmpty(app.CoverLetter))
+                        {
+                            <p class="small text-muted">@app.CoverLetter</p>
+                        }
+                        else
+                        {
+                            <p class="small text-muted">No cover letter provided.</p>
+                        }
+                    </div>
+
+                    <div>
+                        <h6 class="fw-bold">Resume</h6>
+                        @if (!string.IsNullOrEmpty(app.ResumeUrl))
+                        {
+                            <a href="@Url.Action("DownloadResume", new { applicationId = app.Id })" class="btn btn-primary" target="_blank" rel="noopener">Download Resume</a>
+                        }
+                        else
+                        {
+                            <p class="text-muted small">Resume not uploaded.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="mb-2">Candidate</h6>
+                    <p class="mb-1"><strong>Name:</strong> @app.CandidateName</p>
+                    <p class="mb-1"><strong>Email:</strong> @app.CandidateEmail</p>
+                    @if (!string.IsNullOrEmpty(app.Candidate?.PhoneNumber))
+                    {
+                        <p class="mb-1"><strong>Phone:</strong> @app.Candidate?.PhoneNumber</p>
+                    }
+                    <hr />
+                    <p class="mb-1"><strong>Job:</strong> @(app.Opportunity?.Title ?? "—")</p>
+                    <p class="mb-1"><strong>Company:</strong> @(app.Opportunity?.Company ?? "—")</p>
+                    <p class="mb-1"><strong>Status:</strong> <span class="badge bg-@GetStatusBadgeColor(app.Status)">@app.Status</span></p>
+                    <p class="mb-0"><strong>Applied:</strong> @app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadgeColor(string status)
+    {
+        return status switch
+        {
+            "Applied" => "secondary",
+            "Shortlisted" => "warning",
+            "Hired" => "success",
+            "Rejected" => "danger",
+            _ => "secondary"
+        };
+    }
+}

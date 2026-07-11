@@ -1,0 +1,53 @@
+﻿@model OpportunityHub.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-3">Profile</h2>
+
+                    @if (TempData["Success"] is string s) { <div class="alert alert-success">@s</div> }
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Full name</dt>
+                        <dd class="col-sm-9">@Model.FullName</dd>
+
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.Email</dd>
+
+                        <dt class="col-sm-3">Phone</dt>
+                        <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+                        <dt class="col-sm-3">Address</dt>
+                        <dd class="col-sm-9">@Model.Address</dd>
+
+                        <dt class="col-sm-3">Skills</dt>
+                        <dd class="col-sm-9">@Model.Skills</dd>
+
+                        <dt class="col-sm-3">Resume</dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.ResumeUrl))
+                            {
+                                <a class="btn btn-sm btn-outline-secondary" href="@Model.ResumeUrl" target="_blank">View resume</a>
+                                <a class="btn btn-sm btn-outline-primary ms-2" href="@Model.ResumeUrl" download>Download</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">No resume uploaded</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <div class="mt-3">
+                        <a class="btn btn-primary" asp-action="Edit">Edit profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

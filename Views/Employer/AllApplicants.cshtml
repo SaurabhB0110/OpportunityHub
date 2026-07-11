@@ -1,0 +1,237 @@
+@{
+    ViewData["Title"] = "All Applicants";
+    var employerJobs = ViewData["EmployerJobs"] as List<dynamic> ?? new List<dynamic>();
+}
+
+<div class="container-fluid py-5">
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <h1 class="display-6 fw-bold mb-2">All Applicants</h1>
+            <p class="text-muted lead">View applications from all your job postings</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("Dashboard")" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- STEP 4: Search & Filter Panel -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Search Applicant</label>
+                    <input type="text" name="search" class="form-control" placeholder="Name or email..." value='@(ViewData["Search"]?.ToString())' />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="" selected='@(string.IsNullOrEmpty(ViewData["StatusFilter"]?.ToString()) ? "selected" : null)'>All Statuses</option>
+                        <option value="Applied" selected='@(ViewData["StatusFilter"]?.ToString() == "Applied" ? "selected" : null)'>Applied</option>
+                        <option value="Shortlisted" selected='@(ViewData["StatusFilter"]?.ToString() == "Shortlisted" ? "selected" : null)'>Shortlisted</option>
+                        <option value="Hired" selected='@(ViewData["StatusFilter"]?.ToString() == "Hired" ? "selected" : null)'>Hired</option>
+                        <option value="Rejected" selected='@(ViewData["StatusFilter"]?.ToString() == "Rejected" ? "selected" : null)'>Rejected</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Job Posting</label>
+                    <select name="jobId" class="form-select">
+                        <option value="" selected='@(string.IsNullOrEmpty(ViewData["JobFilter"]?.ToString()) ? "selected" : null)'>All Jobs</option>
+                        @foreach (var job in employerJobs)
+                        {
+                            var isSelected = ViewData["JobFilter"]?.ToString() == job.Id.ToString();
+                            if (isSelected)
+                            {
+                                <option value="@job.Id" selected>@job.Title</option>
+                            }
+                            else
+                            {
+                                <option value="@job.Id">@job.Title</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">From</label>
+                    <input type="date" name="fromDate" class="form-control" value='@(ViewData["FromDate"]?.ToString())' />
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">To</label>
+                    <input type="date" name="toDate" class="form-control" value='@(ViewData["ToDate"]?.ToString())' />
+                </div>
+
+                <div class="col-md-1">
+                    <label class="form-label">Sort</label>
+                    <select name="sort" class="form-select">
+                        <option value="newest" selected='@((ViewData["Sort"]?.ToString() == "newest" || ViewData["Sort"] == null) ? "selected" : null)'>Newest</option>
+                        <option value="oldest" selected='@(ViewData["Sort"]?.ToString() == "oldest" ? "selected" : null)'>Oldest</option>
+                        <option value="name_asc" selected='@(ViewData["Sort"]?.ToString() == "name_asc" ? "selected" : null)'>A-Z</option>
+                        <option value="name_desc" selected='@(ViewData["Sort"]?.ToString() == "name_desc" ? "selected" : null)'>Z-A</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end gap-1">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+                    <a href="@Url.Action("AllApplicants")" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i> No applicants yet. Check back soon!
+        </div>
+    }
+    else
+    {
+        int currentPage = ViewData["CurrentPage"] as int? ?? 1;
+        int totalPages = ViewData["TotalPages"] as int? ?? 1;
+        int totalRecords = ViewData["TotalRecords"] as int? ?? 0;
+        int pageSize = ViewData["PageSize"] as int? ?? 10;
+        int startPage = Math.Max(1, currentPage - 2);
+        int endPage = Math.Min(totalPages, currentPage + 2);
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Candidate Name</th>
+                        <th>Email</th>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied</th>
+                        <th>Resume</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        <tr>
+                            <td class="fw-medium">@app.CandidateName</td>
+                            <td>@app.CandidateEmail</td>
+                            <td>@(app.Opportunity?.Title ?? "—")</td>
+                            <td>@(app.Opportunity?.Company ?? "—")</td>
+                            <td>@app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(app.ResumeUrl))
+                                {
+                                    <a class="btn btn-sm btn-outline-primary" href="@Url.Action("DownloadResume", new { applicationId = app.Id })" target="_blank">
+                                        <i class="bi bi-download"></i> Download
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a class="btn btn-outline-secondary" href="@Url.Action("Applicants", new { id = app.OpportunityId })" title="View all applicants for this job">
+                                        <i class="bi bi-eye"></i> View Job
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Button -->
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        @if (currentPage > 1)
+                        {
+                            <a class="page-link" href="@Url.Action("AllApplicants", new { search = ViewData["Search"], status = ViewData["StatusFilter"], jobId = ViewData["JobFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = currentPage - 1 })">Previous</a>
+                        }
+                        else
+                        {
+                            <span class="page-link">Previous</span>
+                        }
+                    </li>
+
+                    <!-- First Page Link -->
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("AllApplicants", new { search = ViewData["Search"], status = ViewData["StatusFilter"], jobId = ViewData["JobFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = 1 })">1</a>
+                        </li>
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    <!-- Page Numbers -->
+                    @for (int p = startPage; p <= endPage; p++)
+                    {
+                        if (p == currentPage)
+                        {
+                            <li class="page-item active"><span class="page-link">@p</span></li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("AllApplicants", new { search = ViewData["Search"], status = ViewData["StatusFilter"], jobId = ViewData["JobFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = p })">@p</a>
+                            </li>
+                        }
+                    }
+
+                    <!-- Last Page Link -->
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("AllApplicants", new { search = ViewData["Search"], status = ViewData["StatusFilter"], jobId = ViewData["JobFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = totalPages })">@totalPages</a>
+                        </li>
+                    }
+
+                    <!-- Next Button -->
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        @if (currentPage < totalPages)
+                        {
+                            <a class="page-link" href="@Url.Action("AllApplicants", new { search = ViewData["Search"], status = ViewData["StatusFilter"], jobId = ViewData["JobFilter"], fromDate = ViewData["FromDate"], toDate = ViewData["ToDate"], sort = ViewData["Sort"], page = currentPage + 1 })">Next</a>
+                        }
+                        else
+                        {
+                            <span class="page-link">Next</span>
+                        }
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="text-center mt-3 text-muted small">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, totalRecords) of @totalRecords applicants (Page @currentPage of @totalPages)
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .display-6 {
+        font-size: 2.5rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

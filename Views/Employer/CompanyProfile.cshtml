@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Company Profile";
+    var user = Model?.Item1;
+    var profile = Model?.Item2;
+    bool isReadOnly = User.IsInRole("SuperAdmin") || User.IsInRole("Candidate");
+}
+
+<section class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <h2 class="mb-0">Company Profile</h2>
+                    @if (isReadOnly)
+                    {
+                        <span class="badge bg-info">Viewing (Read Only)</span>
+                    }
+                </div>
+
+                @if (TempData["Success"] is string s)
+                {
+                    <div class="alert alert-success">@s</div>
+                }
+                @if (TempData["Error"] is string e)
+                {
+                    <div class="alert alert-danger">@e</div>
+                }
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var m in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@m.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-action="CompanyProfile" asp-controller="Employer" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Company name</label>
+                        <input name="companyName" value="@user.CompanyName" class="form-control" @(isReadOnly ? "readonly" : "required") />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Company description</label>
+                        <textarea name="companyDescription" class="form-control" rows="4" @(isReadOnly ? "readonly" : "")>@user.CompanyDescription</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Website</label>
+                            <input name="website" value="@user.Website" class="form-control" @(isReadOnly ? "readonly" : "") />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Contact number</label>
+                            <input name="contactNumber" value="@user.ContactNumber" class="form-control" @(isReadOnly ? "readonly" : "") />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Company address</label>
+                        <input name="companyAddress" value="@profile.CompanyAddress" class="form-control" @(isReadOnly ? "readonly" : "") />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Employer ID (optional)</label>
+                        <input name="employerId" value="@profile.EmployerId" class="form-control" @(isReadOnly ? "readonly" : "") />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Company logo</label>
+                        <div class="mb-2">
+                            @if (!string.IsNullOrWhiteSpace(profile.VerificationDocumentUrl))
+                            {
+                                <img src="@profile.VerificationDocumentUrl" alt="Logo" style="max-height:120px; max-width:240px; display:block; margin-bottom:8px;" />
+                            }
+                            else
+                            {
+                                <div class="border rounded p-3 text-muted">No logo uploaded</div>
+                            }
+                        </div>
+                        @if (!isReadOnly)
+                        {
+                            <input type="file" name="logo" accept=".png,.jpg,.jpeg,.gif,.svg" class="form-control" />
+                            <small class="form-text text-muted">Allowed formats: png, jpg, jpeg, gif, svg</small>
+                        }
+                    </div>
+
+                    @if (!isReadOnly)
+                    {
+                        <div class="d-flex justify-content-between">
+                            <a class="btn btn-secondary" href="@Url.Action("Dashboard", "Employer")">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save profile</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-start">
+                            <a class="btn btn-secondary" href="@Url.Action("Index", "Admin")">Back to Dashboard</a>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

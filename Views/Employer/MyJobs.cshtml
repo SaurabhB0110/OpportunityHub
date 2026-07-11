@@ -1,0 +1,83 @@
+﻿@model List<OpportunityHub.Models.Opportunity>
+@{
+    ViewData["Title"] = "My Jobs";
+}
+
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <h1 class="h2 fw-bold mb-2">My Jobs</h1>
+            <p class="text-muted">Manage your job postings</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("Create")" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-lg"></i> Post New Job
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var job in Model)
+            {
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title fw-bold">@job.Title</h5>
+                                    <p class="text-muted mb-0">@job.Location • @job.WorkMode</p>
+                                </div>
+                                <span class="badge bg-primary">@job.Type</span>
+                            </div>
+
+                            <p class="card-text text-muted small mb-3">
+                                Posted: @job.PostedAt.ToString("MMM d, yyyy") | 
+                                Apply by: @job.ApplyBy.ToString("MMM d, yyyy")
+                            </p>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-4">
+                                    <div class="p-2 bg-light rounded text-center">
+                                        <small class="d-block text-muted">Applicants</small>
+                                        <strong>@job.Applicants</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <!-- Edit removed: jobs are not editable after publishing -->
+
+                                <a href="@Url.Action("Applicants", new { id = job.Id })" class="btn btn-sm btn-outline-info flex-grow-1">View Applicants</a>
+
+                                <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Delete this job and all its applications?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@job.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <p style="font-size: 48px; margin-bottom: 16px;">📭</p>
+            <p class="text-muted mb-4">You haven't posted any jobs yet</p>
+            <a href="@Url.Action("Create")" class="btn btn-primary">Post Your First Job</a>
+        </div>
+    }
+</div>

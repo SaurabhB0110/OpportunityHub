@@ -1,0 +1,129 @@
+@model CreateOpportunityInput
+@{
+    ViewData["Title"] = "Post an opportunity";
+}
+<section class="page-hero employer-hero"><div class="shell"><span class="kicker">BUILD YOUR TEAM</span><h1>Meet people ready to make an impact.</h1><p>Share your role with motivated candidates across India.</p></div></section>
+<section class="employer-section"><div class="shell employer-layout">
+    <div class="posting-benefits"><span class="kicker">WHY OPPORTUNITYHUB</span><h2>Hiring should feel human.</h2><p>Write a clear, welcoming opportunity and connect with people who are excited to contribute.</p><div class="benefit"><span>✓</span><div><b>Reach emerging talent</b><p>Connect with motivated students and early-career professionals.</p></div></div><div class="benefit"><span>✓</span><div><b>Simple, thoughtful applications</b><p>Get the details you need without making candidates jump through hoops.</p></div></div><div class="benefit"><span>✓</span><div><b>Post in a few minutes</b><p>Your opportunity appears immediately after submission.</p></div></div></div>
+    <form class="posting-form" method="post">
+    @Html.AntiForgeryToken()
+    <div class="form-heading"><span>01</span><div><h2>Tell us about the role</h2><p>Clear details help the right candidates find you.</p></div></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-grid">
+        <div class="form-group full">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" class="form-control" placeholder="e.g. Product Design Intern" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="Company"></label>
+            <input asp-for="Company" class="form-control" placeholder="Your company name" />
+            <span asp-validation-for="Company" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Type"></label>
+            <select asp-for="Type" class="form-select">
+                <option>Internship</option>
+                <option>Full-time</option>
+                <option>Part-time</option>
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Category"></label>
+            <select asp-for="Category" class="form-select">
+                <option>Software Development</option>
+                <option>Web Development</option>
+                <option>Mobile Development</option>
+                <option>Cloud Computing</option>
+                <option>DevOps</option>
+                <option>Cyber Security</option>
+                <option>Data Science</option>
+                <option>AI &amp; Machine Learning</option>
+                <option>UI/UX Design</option>
+                <option>Product Management</option>
+                <option>Business Analysis</option>
+                <option>Quality Assurance</option>
+                <option>Database Administration</option>
+                <option>Networking</option>
+                <option>Technical Support</option>
+                <option>Digital Marketing</option>
+                <option>Graphic Design</option>
+                <option>Content Writing</option>
+                <option>Human Resources</option>
+                <option>Finance</option>
+                <option>Sales</option>
+                <option>Customer Support</option>
+                <option>Operations</option>
+                <option>Project Management</option>
+                <option>Others</option>
+                <option>Internship</option>
+                <option>Freelance</option>
+            </select>
+            <span asp-validation-for="Category" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Location"></label>
+            <input asp-for="Location" class="form-control" placeholder="e.g. Bengaluru" />
+            <span asp-validation-for="Location" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="WorkMode"></label>
+            <select asp-for="WorkMode" class="form-select">
+                <option>Remote</option>
+                <option>Hybrid</option>
+                <option>On-site</option>
+            </select>
+            <span asp-validation-for="WorkMode" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Compensation"></label>
+            <input asp-for="Compensation" class="form-control" placeholder="e.g. ₹20,000 / month" />
+            <span asp-validation-for="Compensation" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Experience"></label>
+            <input asp-for="Experience" class="form-control" placeholder="e.g. Fresher or 1–2 years" />
+            <span asp-validation-for="Experience" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="Description"></label>
+            <textarea asp-for="Description" class="form-control" rows="6" placeholder="Describe the team, the work, and what makes this opportunity meaningful..."></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="Responsibilities"></label>
+            <input asp-for="Responsibilities" class="form-control" placeholder="Describe the key responsibilities for this role" />
+            <span asp-validation-for="Responsibilities" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="Requirements"></label>
+            <input asp-for="Requirements" class="form-control" placeholder="Describe the qualifications, experience and qualities you're looking for" />
+            <span asp-validation-for="Requirements" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="Skills"></label>
+            <input asp-for="Skills" class="form-control" placeholder="Example: C#, ASP.NET MVC, SQL Server" />
+            <span asp-validation-for="Skills" class="text-danger"></span>
+        </div>
+
+        <div class="form-group full">
+            <label asp-for="ApplyBy"></label>
+            <input asp-for="ApplyBy" class="form-control" />
+            <span asp-validation-for="ApplyBy" class="text-danger"></span>
+        </div>
+    </div>
+    <button class="btn btn-primary btn-lg w-100" type="submit">Publish opportunity <span>→</span></button><p class="form-reassurance">By publishing, you agree to keep this opportunity accurate and candidate-friendly.</p></form>
+</div></section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

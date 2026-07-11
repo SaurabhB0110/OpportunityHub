@@ -1,0 +1,179 @@
+@model List<JobApplication>
+
+@{
+    ViewData["Title"] = "Employer Dashboard";
+    var totalJobs = ViewBag.TotalJobs as int? ?? 0;
+    var totalApplications = ViewBag.TotalApplications as int? ?? 0;
+    var pendingApplications = ViewBag.PendingApplications as int? ?? 0;
+    var shortlistedApplications = ViewBag.ShortlistedApplications as int? ?? 0;
+    var user = User.Identity?.Name ?? "Employer";
+}
+
+<div class="container-fluid py-5 admin-dashboard employer-section">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-6 fw-bold mb-1">Welcome back, @user!</h1>
+            <p class="text-muted small mb-0">Manage your job postings and applications</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="@Url.Action("Create", "Employer")" class="btn btn-outline-primary btn-small">
+                <i class="bi bi-plus-lg"></i> Post New Job
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Cards (Admin-style) -->
+    <div class="row g-4 mb-5">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-primary text-white"><i class="bi bi-briefcase-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Total Jobs Posted</div>
+                    <div class="h3 mb-0 fw-bold">@totalJobs</div>
+                    <div class="text-sm text-muted mt-1">Open & closed roles</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-info text-white"><i class="bi bi-people-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Total Applications</div>
+                    <div class="h3 mb-0 fw-bold">@totalApplications</div>
+                    <div class="text-sm text-muted mt-1">All applications received</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-warning text-white"><i class="bi bi-hourglass-split"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Pending Applications</div>
+                    <div class="h3 mb-0 fw-bold">@pendingApplications</div>
+                    <div class="text-sm text-muted mt-1">Awaiting review</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card-modern p-3 d-flex gap-3 align-items-start kpi-card">
+                <div class="icon-circle bg-success text-white"><i class="bi bi-star-fill"></i></div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small">Shortlisted</div>
+                    <div class="h3 mb-0 fw-bold">@shortlistedApplications</div>
+                    <div class="text-sm text-muted mt-1">Candidates moved to shortlist</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-5 mt-3">
+        <div class="col-lg-8">
+            <div class="card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">Recent Applications</h6>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <div class="table-responsive-modern">
+                            <table class="table admin-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Job</th>
+                                        <th>Status</th>
+                                        <th>Applied</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var app in Model.OrderByDescending(a => a.AppliedAt).Take(5))
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@app.CandidateName</td>
+                                            <td>@(app.Opportunity?.Title ?? "—")</td>
+                                            <td>
+                                                <span class="badge badge-@GetStatusBadgeColor(app.Status)">@app.Status</span>
+                                            </td>
+                                            <td>@app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
+                                            <td class="text-end">
+                                                <a class="btn btn-sm btn-light" href="@Url.Action("Applicants", new { id = app.OpportunityId })" title="View applicants">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state-container text-center p-5 m-4">
+                            <div class="empty-state-icon"><i class="bi bi-inbox" style="font-size:2.4rem;"></i></div>
+                            <h3 class="empty-state-title">No applications yet</h3>
+                            <p class="empty-state-description">Once people apply to your postings you'll see them here.</p>
+                            <a class="btn btn-primary mt-3" href="@Url.Action("Create", "Employer")"><i class="bi bi-plus-lg"></i> Post first job</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("Create", "Employer")" class="btn btn-primary btn-block"><i class="bi bi-plus-lg"></i> Post Opportunity</a>
+                        <a href="@Url.Action("Jobs", "Employer")" class="btn btn-outline-primary btn-block"><i class="bi bi-list-ul"></i> Manage Jobs</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.kpi-card').forEach((c, i) => {
+                    c.style.opacity = 0;
+                    c.style.transform = 'translateY(6px)';
+                    setTimeout(() => {
+                        c.style.transition = 'all .45s cubic-bezier(.2,.9,.3,1)';
+                        c.style.opacity = 1;
+                        c.style.transform = 'translateY(0)';
+                    }, 80 * i);
+                });
+            });
+        })();
+    </script>
+}
+
+@functions {
+    private string GetStatusBadgeColor(string status)
+    {
+        switch (status?.ToLowerInvariant())
+        {
+            case "pending":
+                return "warning";
+            case "shortlisted":
+                return "info";
+            case "hired":
+                return "success";
+            case "rejected":
+                return "danger";
+            default:
+                return "secondary";
+        }
+    }
+}

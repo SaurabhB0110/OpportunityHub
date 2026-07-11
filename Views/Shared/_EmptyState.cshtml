@@ -1,0 +1,11 @@
+@model OpportunityHub.Models.EmptyStateViewModel
+
+<div class="empty-state-container" role="status" aria-live="polite">
+    <div class="empty-state-icon">??</div>
+    <h3 class="empty-state-title">@Model.Title</h3>
+    <p class="empty-state-description">@Model.Message</p>
+    @if (!string.IsNullOrEmpty(Model.ButtonText) && !string.IsNullOrEmpty(Model.ButtonUrl))
+    {
+        <a href="@Model.ButtonUrl" class="btn btn-primary empty-state-action">@Model.ButtonText</a>
+    }
+</div>

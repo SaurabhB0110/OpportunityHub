@@ -1,0 +1,134 @@
+@model OpportunityHub.ViewModels.RegisterCandidateViewModel
+
+@{
+    ViewData["Title"] = "Register as Candidate";
+}
+
+<div class="auth-page">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="auth-card">
+                    <div class="auth-card-body p-4">
+                        <h2 class="mb-3">Create your candidate account</h2>
+
+                        <form asp-action="RegisterCandidate" method="post" enctype="multipart/form-data">
+                            <div asp-validation-summary="All" class="form-error mb-3"></div>
+
+                            <h6 class="section-title">Personal information</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FullName" class="form-label visually-hidden"></label>
+                                    <input asp-for="FullName" class="form-control" placeholder="Full name" />
+                                    <span asp-validation-for="FullName" class="form-error text-danger small"></span>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="Age" class="form-label visually-hidden"></label>
+                                    <input asp-for="Age" class="form-control" placeholder="Age" />
+                                    <span asp-validation-for="Age" class="form-error text-danger small"></span>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label asp-for="Phone" class="form-label visually-hidden"></label>
+                                    <input asp-for="Phone" class="form-control" placeholder="Phone" />
+                                    <span asp-validation-for="Phone" class="form-error text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label visually-hidden"></label>
+                                <input asp-for="Email" class="form-control" placeholder="Email address" />
+                                <span asp-validation-for="Email" class="form-error text-danger small"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Password" class="form-label visually-hidden"></label>
+                                    <input asp-for="Password" class="form-control" placeholder="Password" />
+                                    <span asp-validation-for="Password" class="form-error text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label visually-hidden"></label>
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm password" />
+                                    <span asp-validation-for="ConfirmPassword" class="form-error text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="City" class="form-label visually-hidden"></label>
+                                <input asp-for="City" class="form-control" placeholder="City" />
+                                <span asp-validation-for="City" class="form-error text-danger small"></span>
+                            </div>
+
+                            <h6 class="section-title mt-4">Education</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TenthSchool" class="form-label visually-hidden"></label>
+                                    <input asp-for="TenthSchool" class="form-control" placeholder="10th School" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TenthPercentage" class="form-label visually-hidden"></label>
+                                    <input asp-for="TenthPercentage" class="form-control" placeholder="10th %" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TwelfthCollege" class="form-label visually-hidden"></label>
+                                    <input asp-for="TwelfthCollege" class="form-control" placeholder="12th College" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TwelfthPercentage" class="form-label visually-hidden"></label>
+                                    <input asp-for="TwelfthPercentage" class="form-control" placeholder="12th %" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="GraduationDegree" class="form-label visually-hidden"></label>
+                                    <input asp-for="GraduationDegree" class="form-control" placeholder="Graduation degree" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="GraduationCollege" class="form-label visually-hidden"></label>
+                                    <input asp-for="GraduationCollege" class="form-control" placeholder="Graduation college" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="GraduationCgpaOrPercentage" class="form-label visually-hidden"></label>
+                                    <input asp-for="GraduationCgpaOrPercentage" class="form-control" placeholder="CGPA / %" />
+                                </div>
+                            </div>
+
+                            <h6 class="section-title mt-4">Professional</h6>
+                            <div class="mb-3">
+                                <label asp-for="Skills" class="form-label visually-hidden"></label>
+                                <input asp-for="Skills" class="form-control" placeholder="e.g. JavaScript, Figma, SQL" />
+                                <span asp-validation-for="Skills" class="form-error text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Projects" class="form-label visually-hidden"></label>
+                                <textarea asp-for="Projects" class="form-control" rows="3" placeholder="Short description of notable projects"></textarea>
+                                <span asp-validation-for="Projects" class="form-error text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Experience" class="form-label visually-hidden"></label>
+                                <input asp-for="Experience" class="form-control" placeholder="e.g. 1-2 years, role summary" />
+                                <span asp-validation-for="Experience" class="form-error text-danger small"></span>
+                            </div>
+
+                            <h6 class="section-title mt-4">Documents</h6>
+                            <div class="mb-3">
+                                <label asp-for="Resume" class="form-label">Upload Resume</label>
+                                <input asp-for="Resume" type="file" class="form-control" />
+                                <span asp-validation-for="Resume" class="form-error text-danger small"></span>
+                            </div>
+
+                            <div class="mt-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">Register</button>
+                                <a asp-controller="Account" asp-action="Login" class="btn btn-link">Already have an account?</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
