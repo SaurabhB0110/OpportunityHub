@@ -11,7 +11,7 @@ phases:
     # Instruct CodeBuild to use .NET 8 runtime
     runtime-versions:
       dotnet: 8.0
-    # Minimal install phase — no extra commands required
+    # Minimal install phase â€” no extra commands required
 
   build:
     commands:
