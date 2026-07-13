@@ -104,7 +104,9 @@
                                         </td>
                                         <td>@app.AppliedAt.ToLocalTime().ToString("dd MMM yyyy")</td>
                                         <td class="text-end">
-                                            <a class="btn btn-sm btn-light" href="@Url.Action("Applicants", new { id = app.OpportunityId })" title="View applicants">
+                                            @* Explicitly point to EmployerController.Applicants to view applicants for the job.
+                                               Candidate view earlier generated /Candidate/Applicants/... which caused a 404. *@
+                                            <a class="btn btn-sm btn-light" href="@Url.Action("Applicants", "Employer", new { id = app.OpportunityId })" title="View applicants">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                         </td>

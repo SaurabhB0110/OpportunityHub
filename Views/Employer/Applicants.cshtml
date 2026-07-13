@@ -186,11 +186,14 @@
                             <div class="d-flex gap-2 flex-wrap">
                                 @if (!string.IsNullOrEmpty(app.ResumeUrl))
                                 {
-                                    <a href="@Url.Action("DownloadResume", new { applicationId = app.Id })" class="btn btn-sm btn-outline-primary">📥 Resume</a>
+                                    @* Explicitly point to ApplicationsController.DownloadResume to avoid 404 when view rendered under Employer controller *@
+                                    <a href="@Url.Action("DownloadResume", "Applications", new { applicationId = app.Id })" class="btn btn-sm btn-outline-primary">📥 Resume</a>
                                 }
 
                                 <!-- View Details -->
-                                <a href="@Url.Action("Details", new { applicationId = app.Id })" class="btn btn-sm btn-outline-secondary">View Details</a>
+                                @* Previously this used Url.Action("Details", new { applicationId = app.Id }) which resolved to EmployerController.Details (incompatible).
+                                   Redirect to the Employer Applicants list for the job instead (no functional change to job/applicant access flow). *@
+                                <a href="@Url.Action("Applicants", "Employer", new { id = jobIdForRedirect })" class="btn btn-sm btn-outline-secondary">View Details</a>
 
                                 <!-- Quick action buttons: Shortlist, Hire, Reject -->
                                 <form asp-action="ShortlistApplicant" method="post" class="d-inline">
