@@ -25,6 +25,7 @@ public class JobsController : Controller
     private readonly ILogger<JobsController> _logger;
     private readonly ApplicantCountService _applicantCountService;
     private readonly INotificationService _notification_service;
+    private readonly IS3Service _s3Service;
 
     public JobsController(
         IOpportunityRepository repository,
@@ -33,7 +34,8 @@ public class JobsController : Controller
         IWebHostEnvironment env,
         ILogger<JobsController> logger,
         ApplicantCountService applicantCountService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IS3Service s3Service)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -42,6 +44,7 @@ public class JobsController : Controller
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _applicantCountService = applicantCountService ?? throw new ArgumentNullException(nameof(applicantCountService));
         _notification_service = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+        _s3Service = s3Service ?? throw new ArgumentNullException(nameof(s3Service));
     }
 
     public IActionResult Index(string? q, string? location, string? workMode, string? type, string? category, string sort = "newest")
@@ -255,18 +258,17 @@ public class JobsController : Controller
             var upload = model.Application?.Resume;
             if (upload != null && upload.Length > 0)
             {
-                var uploadsRoot = Path.Combine(_env.WebRootPath ?? "wwwroot", "uploads", "resumes");
-                Directory.CreateDirectory(uploadsRoot);
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(upload.FileName)}";
-                var filePath = Path.Combine(uploadsRoot, fileName);
-
-                using (var stream = System.IO.File.Create(filePath))
+                try
                 {
-                    await upload.CopyToAsync(stream);
+                    // Upload to S3 (folder: resumes) using the shared IS3Service implementation
+                    resumeUrl = await _s3Service.UploadFileAsync(upload, "resumes");
+                    _logger.LogInformation("Uploaded resume to S3 for user {UserId}: {ResumeUrl}", user.Id, resumeUrl);
                 }
-
-                resumeUrl = $"/uploads/resumes/{fileName}";
-                _logger.LogInformation("Saved uploaded resume for user {UserId} to {Path}", user.Id, resumeUrl);
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "S3 upload failed for user {UserId} during job apply; falling back to stored ResumeUrl", user.Id);
+                    resumeUrl = user.ResumeUrl;
+                }
             }
             else if (!string.IsNullOrEmpty(user.ResumeUrl))
             {
@@ -278,7 +280,7 @@ public class JobsController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error while saving resume for user {UserId}", user.Id);
+            _logger.LogError(ex, "Error while processing resume for user {UserId}", user.Id);
             application.ResumeUrl = user.ResumeUrl;
         }
 
