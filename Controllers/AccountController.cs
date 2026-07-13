@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Mail;
+using Microsoft.EntityFrameworkCore; // needed for FirstOrDefaultAsync
 
 namespace OpportunityHub.Controllers;
 
@@ -72,6 +73,28 @@ public class AccountController : Controller
         {
             ModelState.AddModelError(string.Empty, "Please verify your email before logging in.");
             return View(model);
+        }
+
+        // Employer-specific: ensure admin approval (preserve pending workflow)
+        if (await _userManager.IsInRoleAsync(user, "Employer"))
+        {
+            try
+            {
+                var profile = await _db.EmployerProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
+                if (profile == null || !profile.IsVerified)
+                {
+                    // Keep employer blocked until admin approval
+                    ModelState.AddModelError(string.Empty, "Your employer account is pending administrator approval.");
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking employer approval status for user {Email}", model.Email);
+                // Fail closed: treat as not approved to avoid accidental login if DB check fails
+                ModelState.AddModelError(string.Empty, "Your employer account is pending administrator approval.");
+                return View(model);
+            }
         }
 
         var signInResult = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
